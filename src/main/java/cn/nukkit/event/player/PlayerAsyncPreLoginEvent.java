@@ -2,6 +2,7 @@ package cn.nukkit.event.player;
 
 import cn.nukkit.Server;
 import cn.nukkit.event.HandlerList;
+import cn.nukkit.utils.LoginChainData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,13 +30,20 @@ public class PlayerAsyncPreLoginEvent extends PlayerEvent {
     private LoginResult loginResult = LoginResult.SUCCESS;
     private String kickMessage = "Plugin Reason";
 
+    private LoginChainData loginChainData;
+
     private final List<Consumer<Server>> scheduledActions = new ArrayList<>();
 
-    public PlayerAsyncPreLoginEvent(String name, UUID uuid, String address, int port) {
+    public PlayerAsyncPreLoginEvent(LoginChainData loginChainData,String name, UUID uuid, String address, int port) {
         this.name = name;
         this.uuid = uuid;
+        this.loginChainData = loginChainData;
         this.address = address;
         this.port = port;
+    }
+
+    public LoginChainData getLoginChainData() {
+        return loginChainData;
     }
 
     public String getName() {

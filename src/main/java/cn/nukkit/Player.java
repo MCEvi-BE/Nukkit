@@ -2206,7 +2206,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
                         @Override
                         public void onRun() {
-                            e = new PlayerAsyncPreLoginEvent(username, uuid, ip, port);
+                            e = new PlayerAsyncPreLoginEvent(loginChainData,username, uuid, ip, port);
                             server.getPluginManager().callEvent(e);
                         }
 
