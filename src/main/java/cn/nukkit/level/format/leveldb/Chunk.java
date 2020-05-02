@@ -441,6 +441,9 @@ public class Chunk extends BaseFullChunk {
                 List<CompoundTag> entities = new ArrayList<>();
 
                 for (Entity entity : this.getEntities().values()) {
+                    if (!entity.isCanSave()) {
+                        continue;
+                    }
                     if (!(entity instanceof Player) && !entity.closed) {
                         entity.saveNBT();
                         entities.add(entity.namedTag);

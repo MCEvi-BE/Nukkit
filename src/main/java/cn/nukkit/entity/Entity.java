@@ -51,6 +51,16 @@ public abstract class Entity extends Location implements Metadatable {
 
     public abstract int getNetworkId();
 
+    private boolean canSave = true;
+
+    public boolean isCanSave() {
+        return canSave;
+    }
+
+    public void setCanSave(boolean canSave) {
+        this.canSave = canSave;
+    }
+
     public static final int DATA_TYPE_BYTE = 0;
     public static final int DATA_TYPE_SHORT = 1;
     public static final int DATA_TYPE_INT = 2;
