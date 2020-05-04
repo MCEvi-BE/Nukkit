@@ -245,6 +245,8 @@ public class Level implements ChunkManager, Metadatable {
 
     private final Map<Long, Map<Character, Object>> lightQueue = new ConcurrentHashMap<>(8, 0.9f, 1);
 
+    private final boolean cacheChunks;
+
     public boolean stopTime;
 
     public float skyLightSubtracted;
@@ -258,8 +260,6 @@ public class Level implements ChunkManager, Metadatable {
     public int tickRateCounter = 0;
 
     public GameRules gameRules;
-
-    private final boolean cacheChunks;
 
     private LevelProvider provider;
 
