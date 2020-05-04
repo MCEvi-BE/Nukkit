@@ -60,4 +60,9 @@ public final class CustomLevel extends Level {
         }
     }
 
+    @Override
+    public boolean save(final boolean force) {
+
+    }
+
 }
