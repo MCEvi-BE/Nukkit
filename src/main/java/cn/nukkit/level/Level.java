@@ -115,15 +115,15 @@ public class Level implements ChunkManager, Metadatable {
 
     private static final int LCG_CONSTANT = 1013904223;
 
+    private static final Entity[] EMPTY_ENTITY_ARR = new Entity[0];
+
+    private static final Entity[] ENTITY_BUFFER = new Entity[512];
+
     public static int COMPRESSION_LEVEL = 8;
 
     private static int levelIdCounter = 1;
 
     private static int chunkLoaderCounter = 1;
-
-    private static final Entity[] EMPTY_ENTITY_ARR = new Entity[0];
-
-    private static final Entity[] ENTITY_BUFFER = new Entity[512];
 
     static {
         Level.randomTickBlocks[BlockID.GRASS] = true;
@@ -211,6 +211,40 @@ public class Level implements ChunkManager, Metadatable {
 
     private final Long2IntMap chunkTickList = new Long2IntOpenHashMap();
 
+    private final String folderName;
+
+    private final boolean useSections;
+
+    private final Vector3 temporalVector;
+
+    private final int chunkTickRadius;
+
+    private final int chunksPerTicks;
+
+    private final boolean clearChunksOnTick;
+
+    private final Class<? extends Generator> generatorClass;
+
+    private final IterableThreadLocal<Generator> generators = new IterableThreadLocal<Generator>() {
+        @Override
+        public Generator init() {
+            try {
+                final Generator generator = Level.this.generatorClass.getConstructor(Map.class).newInstance(Level.this.provider.getGeneratorOptions());
+                final NukkitRandom rand = new NukkitRandom(Level.this.getSeed());
+                if (Server.getInstance().isPrimaryThread()) {
+                    generator.init(Level.this, rand);
+                }
+                generator.init(new PopChunkManager(Level.this.getSeed()), rand);
+                return generator;
+            } catch (final Throwable e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+    };
+
+    private final Map<Long, Map<Character, Object>> lightQueue = new ConcurrentHashMap<>(8, 0.9f, 1);
+
     public boolean stopTime;
 
     public float skyLightSubtracted;
@@ -225,13 +259,11 @@ public class Level implements ChunkManager, Metadatable {
 
     public GameRules gameRules;
 
-    private boolean cacheChunks = false;
+    private final boolean cacheChunks;
 
     private LevelProvider provider;
 
     private float time;
-
-    private final String folderName;
 
     private Vector3 mutableBlock;
 
@@ -243,42 +275,11 @@ public class Level implements ChunkManager, Metadatable {
 
     private BlockMetadataStore blockMetadata;
 
-    private final boolean useSections;
-
     private Position temporalPosition;
-
-    private final Vector3 temporalVector;
-
-    private final int chunkTickRadius;
-
-    private final int chunksPerTicks;
-
-    private final boolean clearChunksOnTick;
 
     private int updateLCG = ThreadLocalRandom.current().nextInt();
 
     private int tickRate;
-
-    private final Class<? extends Generator> generatorClass;
-
-    private final IterableThreadLocal<Generator> generators = new IterableThreadLocal<Generator>() {
-        @Override
-        public Generator init() {
-            try {
-                final Generator generator = Level.this.generatorClass.getConstructor(Map.class).newInstance(Level.this.provider.getGeneratorOptions());
-                final NukkitRandom rand = new NukkitRandom(Level.this.getSeed());
-                ChunkManager manager;
-                if (Server.getInstance().isPrimaryThread()) {
-                    generator.init(Level.this, rand);
-                }
-                generator.init(new PopChunkManager(Level.this.getSeed()), rand);
-                return generator;
-            } catch (final Throwable e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-    };
 
     private boolean raining = false;
 
@@ -291,8 +292,6 @@ public class Level implements ChunkManager, Metadatable {
     private long levelCurrentTick = 0;
 
     private int dimension;
-
-    private final Map<Long, Map<Character, Object>> lightQueue = new ConcurrentHashMap<>(8, 0.9f, 1);
 
     private int lastUnloadIndex;
 
