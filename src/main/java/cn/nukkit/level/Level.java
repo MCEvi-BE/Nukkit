@@ -301,7 +301,7 @@ public class Level implements ChunkManager, Metadatable {
         this.server = server;
         this.autoSave = server.getAutoSave();
 
-        final boolean convert = provider == McRegion.class || provider == LevelDB.class;
+        final boolean convert = provider.equals(McRegion.class) || provider.equals(LevelDB.class);
         try {
             if (convert) {
                 final String newPath = new File(path).getParent() + "/" + name + ".old/";
