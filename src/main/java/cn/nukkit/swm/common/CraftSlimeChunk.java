@@ -19,7 +19,6 @@ public class CraftSlimeChunk implements SlimeChunk {
     private final int x;
     private final int z;
 
-    @Setter
     private final SlimeChunkSection[] sections;
     private final CompoundTag heightMaps;
     private final int[] biomes;

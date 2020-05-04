@@ -12,16 +12,15 @@ import cn.nukkit.swm.api.world.SlimeChunkSection;
 import cn.nukkit.swm.api.world.SlimeWorld;
 import cn.nukkit.swm.api.world.properties.SlimePropertyMap;
 import com.github.luben.zstd.Zstd;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -29,38 +28,46 @@ import java.util.stream.Collectors;
 public class CraftSlimeWorld implements SlimeWorld {
 
     private final String name;
+
     private final Map<Long, SlimeChunk> chunks;
+
     private final CompoundTag extraData;
+
     private final List<CompoundTag> worldMaps;
+
     private final SlimePropertyMap propertyMap;
+
     private final boolean readOnly;
+
     private final boolean locked;
+
     private SlimeLoader loader;
+
     private byte version;
 
-    private static void writeBitSetAsBytes(DataOutputStream outStream, BitSet set, int fixedSize) throws IOException {
-        byte[] array = set.toByteArray();
+    private static void writeBitSetAsBytes(final DataOutputStream outStream, final BitSet set, final int fixedSize) throws IOException {
+        final byte[] array = set.toByteArray();
         outStream.write(array);
 
-        int chunkMaskPadding = fixedSize - array.length;
+        final int chunkMaskPadding = fixedSize - array.length;
 
         for (int i = 0; i < chunkMaskPadding; i++) {
             outStream.write(0);
         }
     }
 
-    private static byte[] serializeChunks(List<SlimeChunk> chunks, byte worldVersion) throws IOException {
-        ByteArrayOutputStream outByteStream = new ByteArrayOutputStream(16384);
-        DataOutputStream outStream = new DataOutputStream(outByteStream);
+    private static byte[] serializeChunks(final List<SlimeChunk> chunks, final byte worldVersion) throws IOException {
+        final ByteArrayOutputStream outByteStream = new ByteArrayOutputStream(16384);
+        final DataOutputStream outStream = new DataOutputStream(outByteStream);
 
-        for (SlimeChunk chunk : chunks) {
+        for (final SlimeChunk chunk : chunks) {
             // Height Maps
             if (worldVersion >= 0x04) {
-                byte[] heightMaps = serializeCompoundTag(chunk.getHeightMaps());
+                final byte[] heightMaps = CraftSlimeWorld.serializeCompoundTag(chunk.getHeightMaps());
                 outStream.writeInt(heightMaps.length);
                 outStream.write(heightMaps);
             } else {
-                int[] heightMap = chunk.getHeightMaps().getIntArray("heightMap");
+                final int[] heightMap = chunk.getHeightMaps().getIntArray("heightMap");
 
                 for (int i = 0; i < 256; i++) {
                     outStream.writeInt(heightMap[i]);
@@ -68,32 +75,32 @@ public class CraftSlimeWorld implements SlimeWorld {
             }
 
             // Biomes
-            int[] biomes = chunk.getBiomes();
+            final int[] biomes = chunk.getBiomes();
             if (worldVersion >= 0x04) {
                 outStream.writeInt(biomes.length);
             }
 
-            for (int biome : biomes) {
+            for (final int biome : biomes) {
                 outStream.writeInt(biome);
             }
 
             // Chunk sections
-            SlimeChunkSection[] sections = chunk.getSections();
-            BitSet sectionBitmask = new BitSet(16);
+            final SlimeChunkSection[] sections = chunk.getSections();
+            final BitSet sectionBitmask = new BitSet(16);
 
             for (int i = 0; i < sections.length; i++) {
                 sectionBitmask.set(i, sections[i] != null);
             }
 
-            writeBitSetAsBytes(outStream, sectionBitmask, 2);
+            CraftSlimeWorld.writeBitSetAsBytes(outStream, sectionBitmask, 2);
 
-            for (SlimeChunkSection section : sections) {
+            for (final SlimeChunkSection section : sections) {
                 if (section == null) {
                     continue;
                 }
 
                 // Block Light
-                boolean hasBlockLight = section.getBlockLight() != null;
+                final boolean hasBlockLight = section.getBlockLight() != null;
                 outStream.writeBoolean(hasBlockLight);
 
                 if (hasBlockLight) {
@@ -103,22 +110,22 @@ public class CraftSlimeWorld implements SlimeWorld {
                 // Block Data
                 if (worldVersion >= 0x04) {
                     // Palette
-                    List<CompoundTag> palette = section.getPalette().getAll();
+                    final List<CompoundTag> palette = section.getPalette().getAll();
                     outStream.writeInt(palette.size());
 
-                    for (CompoundTag value : palette) {
-                        byte[] serializedValue = serializeCompoundTag(value);
+                    for (final CompoundTag value : palette) {
+                        final byte[] serializedValue = CraftSlimeWorld.serializeCompoundTag(value);
 
                         outStream.writeInt(serializedValue.length);
                         outStream.write(serializedValue);
                     }
 
                     // Block states
-                    long[] blockStates = section.getBlockStates();
+                    final long[] blockStates = section.getBlockStates();
 
                     outStream.writeInt(blockStates.length);
 
-                    for (long value : section.getBlockStates()) {
+                    for (final long value : section.getBlockStates()) {
                         outStream.writeLong(value);
                     }
                 } else {
@@ -127,7 +134,7 @@ public class CraftSlimeWorld implements SlimeWorld {
                 }
 
                 // Sky Light
-                boolean hasSkyLight = section.getSkyLight() != null;
+                final boolean hasSkyLight = section.getSkyLight() != null;
                 outStream.writeBoolean(hasSkyLight);
 
                 if (hasSkyLight) {
@@ -139,42 +146,44 @@ public class CraftSlimeWorld implements SlimeWorld {
         return outByteStream.toByteArray();
     }
 
-    private static byte[] serializeCompoundTag(CompoundTag tag) throws IOException {
+    private static byte[] serializeCompoundTag(final CompoundTag tag) throws IOException {
         if (tag == null || tag.parseValue().isEmpty()) {
             return new byte[0];
         }
-        ByteArrayOutputStream outByteStream = new ByteArrayOutputStream();
-        NBTOutputStream outStream = new NBTOutputStream(outByteStream, ByteOrder.BIG_ENDIAN);
+        final ByteArrayOutputStream outByteStream = new ByteArrayOutputStream();
+        final NBTOutputStream outStream = new NBTOutputStream(outByteStream, ByteOrder.BIG_ENDIAN);
         outStream.writeTag(tag);
 
         return outByteStream.toByteArray();
     }
 
     @Override
-    public SlimeChunk getChunk(int x, int z) {
-        synchronized (chunks) {
-            Long index = (((long) z) * Integer.MAX_VALUE + ((long) x));
+    public SlimeChunk getChunk(final int x, final int z) {
+        synchronized (this.chunks) {
+            final Long index = (long) z * Integer.MAX_VALUE + (long) x;
 
-            return chunks.get(index);
-        }
-    }
-
-    public void updateChunk(SlimeChunk chunk) {
-        if (!chunk.getWorldName().equals(getName())) {
-            throw new IllegalArgumentException("Chunk (" + chunk.getX() + ", " + chunk.getZ() + ") belongs to world '"
-                + chunk.getWorldName() + "', not to '" + getName() + "'!");
-        }
-
-        synchronized (chunks) {
-            chunks.put(((long) chunk.getZ()) * Integer.MAX_VALUE + ((long) chunk.getX()), chunk);
+            return this.chunks.get(index);
         }
     }
 
     @Override
-    public SlimeWorld clone(String worldName) {
+    public SlimeWorld.SlimeProperties getProperties() {
+        return SlimeWorld.SlimeProperties.builder().spawnX(this.propertyMap.getInt(cn.nukkit.swm.api.world.properties.SlimeProperties.SPAWN_X))
+            .spawnY(this.propertyMap.getInt(cn.nukkit.swm.api.world.properties.SlimeProperties.SPAWN_Y))
+            .spawnZ(this.propertyMap.getInt(cn.nukkit.swm.api.world.properties.SlimeProperties.SPAWN_Z))
+            .environment(this.propertyMap.getString(cn.nukkit.swm.api.world.properties.SlimeProperties.ENVIRONMENT))
+            .pvp(this.propertyMap.getBoolean(cn.nukkit.swm.api.world.properties.SlimeProperties.PVP))
+            .allowMonsters(this.propertyMap.getBoolean(cn.nukkit.swm.api.world.properties.SlimeProperties.ALLOW_MONSTERS))
+            .allowAnimals(this.propertyMap.getBoolean(cn.nukkit.swm.api.world.properties.SlimeProperties.ALLOW_ANIMALS))
+            .difficulty(Server.getDifficultyFromString(this.propertyMap.getString(cn.nukkit.swm.api.world.properties.SlimeProperties.DIFFICULTY).toLowerCase(Locale.ENGLISH)))
+            .readOnly(this.readOnly).build();
+    }
+
+    @Override
+    public SlimeWorld clone(final String worldName) {
         try {
-            return clone(worldName, null);
-        } catch (WorldAlreadyExistsException | IOException ignored) {
+            return this.clone(worldName, null);
+        } catch (final WorldAlreadyExistsException | IOException ignored) {
             return null; // Never going to happen
         }
     }
@@ -182,13 +191,13 @@ public class CraftSlimeWorld implements SlimeWorld {
     // World Serialization methods
 
     @Override
-    public SlimeWorld clone(String worldName, SlimeLoader loader) throws WorldAlreadyExistsException, IOException {
-        return clone(worldName, loader, true);
+    public SlimeWorld clone(final String worldName, final SlimeLoader loader) throws WorldAlreadyExistsException, IOException {
+        return this.clone(worldName, loader, true);
     }
 
     @Override
-    public SlimeWorld clone(String worldName, SlimeLoader loader, boolean lock) throws WorldAlreadyExistsException, IOException {
-        if (name.equals(worldName)) {
+    public SlimeWorld clone(final String worldName, final SlimeLoader loader, final boolean lock) throws WorldAlreadyExistsException, IOException {
+        if (this.name.equals(worldName)) {
             throw new IllegalArgumentException("The clone world cannot have the same name as the original world!");
         }
 
@@ -202,11 +211,11 @@ public class CraftSlimeWorld implements SlimeWorld {
             }
         }
 
-        CraftSlimeWorld world;
+        final CraftSlimeWorld world;
 
-        synchronized (chunks) {
-            world = new CraftSlimeWorld(worldName, new HashMap<>(chunks), extraData.clone(), new ArrayList<>(worldMaps),
-                propertyMap, loader == null, lock, loader == null ? this.loader : loader, version);
+        synchronized (this.chunks) {
+            world = new CraftSlimeWorld(worldName, new HashMap<>(this.chunks), this.extraData.clone(), new ArrayList<>(this.worldMaps),
+                this.propertyMap, loader == null, lock, loader == null ? this.loader : loader, this.version);
         }
 
         if (loader != null) {
@@ -216,34 +225,32 @@ public class CraftSlimeWorld implements SlimeWorld {
         return world;
     }
 
-    @Override
-    public SlimeWorld.SlimeProperties getProperties() {
-        return SlimeProperties.builder().spawnX(propertyMap.getInt(cn.nukkit.swm.api.world.properties.SlimeProperties.SPAWN_X))
-            .spawnY(propertyMap.getInt(cn.nukkit.swm.api.world.properties.SlimeProperties.SPAWN_Y))
-            .spawnZ(propertyMap.getInt(cn.nukkit.swm.api.world.properties.SlimeProperties.SPAWN_Z))
-            .environment(propertyMap.getString(cn.nukkit.swm.api.world.properties.SlimeProperties.ENVIRONMENT))
-            .pvp(propertyMap.getBoolean(cn.nukkit.swm.api.world.properties.SlimeProperties.PVP))
-            .allowMonsters(propertyMap.getBoolean(cn.nukkit.swm.api.world.properties.SlimeProperties.ALLOW_MONSTERS))
-            .allowAnimals(propertyMap.getBoolean(cn.nukkit.swm.api.world.properties.SlimeProperties.ALLOW_ANIMALS))
-            .difficulty(Server.getDifficultyFromString(propertyMap.getString(cn.nukkit.swm.api.world.properties.SlimeProperties.DIFFICULTY).toLowerCase(Locale.ENGLISH)))
-            .readOnly(readOnly).build();
+    public void updateChunk(final SlimeChunk chunk) {
+        if (!chunk.getWorldName().equals(this.getName())) {
+            throw new IllegalArgumentException("Chunk (" + chunk.getX() + ", " + chunk.getZ() + ") belongs to world '"
+                + chunk.getWorldName() + "', not to '" + this.getName() + "'!");
+        }
+
+        synchronized (this.chunks) {
+            this.chunks.put((long) chunk.getZ() * Integer.MAX_VALUE + (long) chunk.getX(), chunk);
+        }
     }
 
     public byte[] serialize() {
-        List<SlimeChunk> sortedChunks;
+        final List<SlimeChunk> sortedChunks;
 
-        synchronized (chunks) {
-            sortedChunks = new ArrayList<>(chunks.values());
+        synchronized (this.chunks) {
+            sortedChunks = new ArrayList<>(this.chunks.values());
         }
 
         sortedChunks.sort(Comparator.comparingLong(chunk -> (long) chunk.getZ() * Integer.MAX_VALUE + (long) chunk.getX()));
         sortedChunks.removeIf(chunk -> chunk == null || Arrays.stream(chunk.getSections()).allMatch(Objects::isNull)); // Remove empty chunks to save space
 
         // Store world properties
-        extraData.parseValue().put("properties", propertyMap.toCompound());
+        this.extraData.parseValue().put("properties", this.propertyMap.toCompound());
 
-        ByteArrayOutputStream outByteStream = new ByteArrayOutputStream();
-        DataOutputStream outStream = new DataOutputStream(outByteStream);
+        final ByteArrayOutputStream outByteStream = new ByteArrayOutputStream();
+        final DataOutputStream outStream = new DataOutputStream(outByteStream);
 
         try {
             // File Header and Slime version
@@ -251,72 +258,72 @@ public class CraftSlimeWorld implements SlimeWorld {
             outStream.write(SlimeFormat.SLIME_VERSION);
 
             // World version
-            outStream.writeByte(version);
+            outStream.writeByte(this.version);
 
             // Lowest chunk coordinates
-            int minX = sortedChunks.stream().mapToInt(SlimeChunk::getX).min().orElse(0);
-            int minZ = sortedChunks.stream().mapToInt(SlimeChunk::getZ).min().orElse(0);
-            int maxX = sortedChunks.stream().mapToInt(SlimeChunk::getX).max().orElse(0);
-            int maxZ = sortedChunks.stream().mapToInt(SlimeChunk::getZ).max().orElse(0);
+            final int minX = sortedChunks.stream().mapToInt(SlimeChunk::getX).min().orElse(0);
+            final int minZ = sortedChunks.stream().mapToInt(SlimeChunk::getZ).min().orElse(0);
+            final int maxX = sortedChunks.stream().mapToInt(SlimeChunk::getX).max().orElse(0);
+            final int maxZ = sortedChunks.stream().mapToInt(SlimeChunk::getZ).max().orElse(0);
 
             outStream.writeShort(minX);
             outStream.writeShort(minZ);
 
             // Width and depth
-            int width = maxX - minX + 1;
-            int depth = maxZ - minZ + 1;
+            final int width = maxX - minX + 1;
+            final int depth = maxZ - minZ + 1;
 
             outStream.writeShort(width);
             outStream.writeShort(depth);
 
             // Chunk Bitmask
-            BitSet chunkBitset = new BitSet(width * depth);
+            final BitSet chunkBitset = new BitSet(width * depth);
 
-            for (SlimeChunk chunk : sortedChunks) {
-                int bitsetIndex = (chunk.getZ() - minZ) * width + (chunk.getX() - minX);
+            for (final SlimeChunk chunk : sortedChunks) {
+                final int bitsetIndex = (chunk.getZ() - minZ) * width + chunk.getX() - minX;
 
                 chunkBitset.set(bitsetIndex, true);
             }
 
-            int chunkMaskSize = (int) Math.ceil((width * depth) / 8.0D);
-            writeBitSetAsBytes(outStream, chunkBitset, chunkMaskSize);
+            final int chunkMaskSize = (int) Math.ceil((width * depth) / 8.0D);
+            CraftSlimeWorld.writeBitSetAsBytes(outStream, chunkBitset, chunkMaskSize);
 
             // Chunks
-            byte[] chunkData = serializeChunks(sortedChunks, version);
-            byte[] compressedChunkData = Zstd.compress(chunkData);
+            final byte[] chunkData = CraftSlimeWorld.serializeChunks(sortedChunks, this.version);
+            final byte[] compressedChunkData = Zstd.compress(chunkData);
 
             outStream.writeInt(compressedChunkData.length);
             outStream.writeInt(chunkData.length);
             outStream.write(compressedChunkData);
 
             // Tile Entities
-            List<CompoundTag> tileEntitiesList = sortedChunks.stream().flatMap(chunk -> chunk.getTileEntities().stream()).collect(Collectors.toList());
-            ListTag<CompoundTag> tileEntitiesNbtList = new ListTag<>("tiles");
+            final List<CompoundTag> tileEntitiesList = sortedChunks.stream().flatMap(chunk -> chunk.getTileEntities().stream()).collect(Collectors.toList());
+            final ListTag<CompoundTag> tileEntitiesNbtList = new ListTag<>("tiles");
             tileEntitiesList.forEach(tileEntitiesNbtList::add);
-            CompoundTag tileEntitiesCompound = new CompoundTag("");
+            final CompoundTag tileEntitiesCompound = new CompoundTag("");
             final List<ListTag<CompoundTag>> listTags = Collections.singletonList(tileEntitiesNbtList);
             listTags.forEach(compoundTagListTag ->
                 tileEntitiesCompound.put(compoundTagListTag.getName(), compoundTagListTag));
-            byte[] tileEntitiesData = serializeCompoundTag(tileEntitiesCompound);
-            byte[] compressedTileEntitiesData = Zstd.compress(tileEntitiesData);
+            final byte[] tileEntitiesData = CraftSlimeWorld.serializeCompoundTag(tileEntitiesCompound);
+            final byte[] compressedTileEntitiesData = Zstd.compress(tileEntitiesData);
 
             outStream.writeInt(compressedTileEntitiesData.length);
             outStream.writeInt(tileEntitiesData.length);
             outStream.write(compressedTileEntitiesData);
 
             // Entities
-            List<CompoundTag> entitiesList = sortedChunks.stream().flatMap(chunk -> chunk.getEntities().stream()).collect(Collectors.toList());
+            final List<CompoundTag> entitiesList = sortedChunks.stream().flatMap(chunk -> chunk.getEntities().stream()).collect(Collectors.toList());
 
             outStream.writeBoolean(!entitiesList.isEmpty());
 
             if (!entitiesList.isEmpty()) {
-                ListTag<CompoundTag> entitiesNbtList = new ListTag<>("entities");
+                final ListTag<CompoundTag> entitiesNbtList = new ListTag<>("entities");
                 entitiesList.forEach(entitiesNbtList::add);
-                CompoundTag entitiesCompound = new CompoundTag("");
+                final CompoundTag entitiesCompound = new CompoundTag("");
                 Collections.singletonList(entitiesNbtList).forEach(compoundTagListTag ->
                     entitiesCompound.put(compoundTagListTag.getName(), compoundTagListTag));
-                byte[] entitiesData = serializeCompoundTag(entitiesCompound);
-                byte[] compressedEntitiesData = Zstd.compress(entitiesData);
+                final byte[] entitiesData = CraftSlimeWorld.serializeCompoundTag(entitiesCompound);
+                final byte[] compressedEntitiesData = Zstd.compress(entitiesData);
 
                 outStream.writeInt(compressedEntitiesData.length);
                 outStream.writeInt(entitiesData.length);
@@ -324,28 +331,29 @@ public class CraftSlimeWorld implements SlimeWorld {
             }
 
             // Extra Tag
-            byte[] extra = serializeCompoundTag(extraData);
-            byte[] compressedExtra = Zstd.compress(extra);
+            final byte[] extra = CraftSlimeWorld.serializeCompoundTag(this.extraData);
+            final byte[] compressedExtra = Zstd.compress(extra);
 
             outStream.writeInt(compressedExtra.length);
             outStream.writeInt(extra.length);
             outStream.write(compressedExtra);
 
-            CompoundTag mapsCompound = new CompoundTag("");
+            final CompoundTag mapsCompound = new CompoundTag("");
             final ListTag<CompoundTag> maps = new ListTag<>("maps");
-            worldMaps.forEach(maps::add);
+            this.worldMaps.forEach(maps::add);
             mapsCompound.put("maps", maps);
 
-            byte[] mapArray = serializeCompoundTag(mapsCompound);
-            byte[] compressedMapArray = Zstd.compress(mapArray);
+            final byte[] mapArray = CraftSlimeWorld.serializeCompoundTag(mapsCompound);
+            final byte[] compressedMapArray = Zstd.compress(mapArray);
 
             outStream.writeInt(compressedMapArray.length);
             outStream.writeInt(mapArray.length);
             outStream.write(compressedMapArray);
-        } catch (IOException ex) { // Ignore
+        } catch (final IOException ex) { // Ignore
             ex.printStackTrace();
         }
 
         return outByteStream.toByteArray();
     }
+
 }
