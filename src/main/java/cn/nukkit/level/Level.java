@@ -281,15 +281,15 @@ public class Level implements ChunkManager, Metadatable {
 
     private int tickRate;
 
-    private boolean raining = false;
+    private boolean raining;
 
-    private int rainTime = 0;
+    private int rainTime;
 
-    private boolean thundering = false;
+    private boolean thundering;
 
-    private int thunderTime = 0;
+    private int thunderTime;
 
-    private long levelCurrentTick = 0;
+    private long levelCurrentTick;
 
     private int dimension;
 
