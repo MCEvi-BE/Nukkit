@@ -6,9 +6,9 @@ import cn.nukkit.level.Level;
 import cn.nukkit.level.format.LevelProvider;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
-import cn.nukkit.swm.common.CraftSlimeWorld;
 import cn.nukkit.swm.api.world.properties.SlimeProperties;
 import cn.nukkit.swm.api.world.properties.SlimePropertyMap;
+import cn.nukkit.swm.common.CraftSlimeWorld;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.Getter;
 import lombok.Setter;
@@ -45,14 +45,16 @@ public final class CustomLevel extends Level {
         setSpawnLocation(new Vector3(propertyMap.getInt(SlimeProperties.SPAWN_X), propertyMap.getInt(SlimeProperties.SPAWN_Y), propertyMap.getInt(SlimeProperties.SPAWN_Z)));
         gameRules.setGameRule(GameRule.DO_MOB_SPAWNING, propertyMap.getBoolean(SlimeProperties.ALLOW_MONSTERS));
         gameRules.setGameRule(GameRule.PVP, propertyMap.getBoolean(SlimeProperties.PVP));
-        new File(nbtStorage.getDirectory(), "session.lock").delete();
-        new File(nbtStorage.getDirectory(), "data").delete();
-        nbtStorage.getDirectory().delete();
-        nbtStorage.getDirectory().getParentFile().delete();
+        final File base = new File(path).getParentFile();
+        final File newbase = new File(base, path);
+        new File(newbase, "level.dat").delete();
+        new File(newbase, "region").delete();
+        newbase.delete();
+        newbase.getParentFile().delete();
         for (CompoundTag mapTag : world.getWorldMaps()) {
-            int id = mapTag.getIntValue("id").get();
+            int id = mapTag.getInt("id");
             WorldMap map = new WorldMap("map_" + id);
-            map.a((NBTTagCompound) Converter.convertTag(mapTag));
+            map.a(mapTag);
             a(map);
         }
     }
