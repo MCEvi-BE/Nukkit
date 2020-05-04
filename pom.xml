@@ -38,6 +38,10 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
+        <repository>
+            <id>glaremasters</id>
+            <url>https://repo.glaremasters.me/repository/concuncan/</url>
+        </repository>
     </repositories>
 
     <distributionManagement>
@@ -54,6 +58,12 @@
     </distributionManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>com.github.luben</groupId>
+            <artifactId>zstd-jni</artifactId>
+            <version>1.4.1-1</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>com.nukkitx</groupId>
             <artifactId>fastutil-lite</artifactId>
@@ -142,7 +152,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.4</version>
+            <version>1.18.12</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

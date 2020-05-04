@@ -1,5 +1,6 @@
 package cn.nukkit.nbt.stream;
 
+import cn.nukkit.nbt.tag.*;
 import cn.nukkit.utils.VarInt;
 
 import java.io.DataOutput;
@@ -8,6 +9,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * author: MagicDroidX
@@ -148,4 +151,158 @@ public class NBTOutputStream implements DataOutput, AutoCloseable {
     public void close() throws IOException {
         this.stream.close();
     }
+
+    public void writeTag(Tag tag) throws IOException {
+        String name = tag.getName();
+        this.stream.writeByte(tag.getId());
+        this.stream.writeUTF(name);
+        if (tag.getId() == Tag.TAG_End) {
+            throw new IOException("Named TAG_End not permitted.");
+        } else {
+            this.writeTagPayload(tag);
+        }
+    }
+
+    private void writeTagPayload(Tag tag) throws IOException {
+        switch (tag.getId()) {
+            case 0:
+                this.writeEndTagPayload((EndTag) tag);
+                break;
+            case 1:
+                this.writeByteTagPayload((ByteTag) tag);
+                break;
+            case 2:
+                this.writeShortTagPayload((ShortTag) tag);
+                break;
+            case 3:
+                this.writeIntTagPayload((IntTag) tag);
+                break;
+            case 4:
+                this.writeLongTagPayload((LongTag) tag);
+                break;
+            case 5:
+                this.writeFloatTagPayload((FloatTag) tag);
+                break;
+            case 6:
+                this.writeDoubleTagPayload((DoubleTag) tag);
+                break;
+            case 7:
+                this.writeByteArrayTagPayload((ByteArrayTag) tag);
+                break;
+            case 8:
+                this.writeStringTagPayload((StringTag) tag);
+                break;
+            case 9:
+                this.writeListTagPayload((ListTag<? extends Tag>) tag);
+                break;
+            case 10:
+                this.writeCompoundTagPayload((CompoundTag) tag);
+                break;
+            case 11:
+                this.writeIntArrayTagPayload((IntArrayTag) tag);
+                break;
+            case 12:
+                this.writeLongArrayTagPayload((LongArrayTag) tag);
+                break;
+            case 13:
+                this.writeShortArrayTagPayload((ShortArrayTag) tag);
+                break;
+            default:
+                throw new IOException("Invalid tag type: " + tag.getId() + ".");
+        }
+
+    }
+
+    private void writeByteTagPayload(ByteTag tag) throws IOException {
+        this.stream.writeByte(tag.getData());
+    }
+
+    private void writeByteArrayTagPayload(ByteArrayTag tag) throws IOException {
+        byte[] bytes = tag.getData();
+        this.stream.writeInt(bytes.length);
+        this.stream.write(bytes);
+    }
+
+    private void writeCompoundTagPayload(CompoundTag tag) throws IOException {
+        Iterator var2 = tag.parseValue().values().iterator();
+
+        while (var2.hasNext()) {
+            Tag childTag = (Tag) var2.next();
+            this.writeTag(childTag);
+        }
+
+        this.stream.writeByte(Tag.TAG_End);
+    }
+
+    private void writeListTagPayload(ListTag<? extends Tag> tag) throws IOException {
+        List<? extends Tag> tags = tag.getAll();
+        int size = tags.size();
+        this.stream.writeByte(tag.type);
+        this.stream.writeInt(size);
+        Iterator<? extends Tag> var4 = tags.iterator();
+
+        while (var4.hasNext()) {
+            Tag tag1 = var4.next();
+            this.writeTagPayload(tag1);
+        }
+
+    }
+
+    private void writeStringTagPayload(StringTag tag) throws IOException {
+        this.stream.writeUTF(tag.parseValue());
+    }
+
+    private void writeDoubleTagPayload(DoubleTag tag) throws IOException {
+        this.stream.writeDouble(tag.getData());
+    }
+
+    private void writeFloatTagPayload(FloatTag tag) throws IOException {
+        this.stream.writeFloat(tag.getData());
+    }
+
+    private void writeLongTagPayload(LongTag tag) throws IOException {
+        this.stream.writeLong(tag.getData());
+    }
+
+    private void writeIntTagPayload(IntTag tag) throws IOException {
+        this.stream.writeInt(tag.getData());
+    }
+
+    private void writeShortTagPayload(ShortTag tag) throws IOException {
+        this.stream.writeShort(tag.getData());
+    }
+
+    private void writeIntArrayTagPayload(IntArrayTag tag) throws IOException {
+        int[] ints = tag.getData();
+        this.stream.writeInt(ints.length);
+
+        for (int i = 0; i < ints.length; ++i) {
+            this.stream.writeInt(ints[i]);
+        }
+
+    }
+
+    private void writeLongArrayTagPayload(LongArrayTag tag) throws IOException {
+        long[] longs = tag.getData();
+        this.stream.writeInt(longs.length);
+
+        for (int i = 0; i < longs.length; ++i) {
+            this.stream.writeLong(longs[i]);
+        }
+
+    }
+
+    private void writeShortArrayTagPayload(ShortArrayTag tag) throws IOException {
+        short[] shorts = tag.getData();
+        this.stream.writeInt(shorts.length);
+
+        for (int i = 0; i < shorts.length; ++i) {
+            this.stream.writeShort(shorts[i]);
+        }
+
+    }
+
+    private void writeEndTagPayload(EndTag tag) {
+    }
+
 }

@@ -19,6 +19,8 @@ public abstract class Tag {
     public static final byte TAG_List = 9;
     public static final byte TAG_Compound = 10;
     public static final byte TAG_Int_Array = 11;
+    public static final byte TAG_Long_Array = 12;
+    public static final byte TAG_Short_Array = 13;
 
     private String name;
 

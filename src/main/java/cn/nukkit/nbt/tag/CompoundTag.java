@@ -5,11 +5,8 @@ import cn.nukkit.nbt.stream.NBTOutputStream;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.StringJoiner;
 
 public class CompoundTag extends Tag implements Cloneable {
     private final Map<String, Tag> tags = new HashMap<>();
@@ -138,6 +135,12 @@ public class CompoundTag extends Tag implements Cloneable {
         return ((NumberTag) tags.get(name)).getData().intValue();
     }
 
+    public Optional<Integer> getByteOptional(String name) {
+        if (!tags.containsKey(name)) return Optional.empty();
+        return Optional.of(
+            ((NumberTag) tags.get(name)).getData().intValue());
+    }
+
     public int getShort(String name) {
         if (!tags.containsKey(name)) return 0;
         return ((NumberTag) tags.get(name)).getData().intValue();
@@ -148,8 +151,13 @@ public class CompoundTag extends Tag implements Cloneable {
         return ((NumberTag) tags.get(name)).getData().intValue();
     }
 
+    public Optional<Integer> getIntOptional(String name) {
+        if (!tags.containsKey(name)) return Optional.empty();
+        return Optional.of(((NumberTag) tags.get(name)).getData().intValue());
+    }
+
     public long getLong(String name) {
-        if (!tags.containsKey(name)) return (long) 0;
+        if (!tags.containsKey(name)) return 0;
         return ((NumberTag) tags.get(name)).getData().longValue();
     }
 
@@ -159,7 +167,7 @@ public class CompoundTag extends Tag implements Cloneable {
     }
 
     public double getDouble(String name) {
-        if (!tags.containsKey(name)) return (double) 0;
+        if (!tags.containsKey(name)) return 0;
         return ((NumberTag) tags.get(name)).getData().doubleValue();
     }
 
@@ -170,6 +178,16 @@ public class CompoundTag extends Tag implements Cloneable {
             return String.valueOf(((NumberTag) tag).getData());
         }
         return ((StringTag) tag).data;
+    }
+
+    public Optional<String> getStringOptional(String name) {
+        if (!tags.containsKey(name)) return Optional.empty();
+        Tag tag = tags.get(name);
+        if (tag instanceof NumberTag) {
+            return Optional.ofNullable(
+                String.valueOf(((NumberTag) tag).getData()));
+        }
+        return Optional.ofNullable(((StringTag) tag).data);
     }
 
     public byte[] getByteArray(String name) {
