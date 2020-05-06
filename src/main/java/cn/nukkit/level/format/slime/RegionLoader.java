@@ -18,6 +18,7 @@ import java.util.TreeMap;
  * Nukkit Project
  */
 public class RegionLoader extends BaseRegionLoader {
+
     public RegionLoader(LevelProvider level, int regionX, int regionZ) throws IOException {
         super(level, regionX, regionZ, "mca");
     }
@@ -84,7 +85,7 @@ public class RegionLoader extends BaseRegionLoader {
 
     @Override
     protected Chunk unserializeChunk(byte[] data) {
-        return Chunk.fromBinary(data, this.levelProvider);
+        return Chunk.fromBinary(0,data, this.levelProvider);
     }
 
     @Override

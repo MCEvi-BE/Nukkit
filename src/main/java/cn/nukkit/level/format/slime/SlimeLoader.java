@@ -1,35 +1,70 @@
-package cn.nukkit.level.format.anvil;
+package cn.nukkit.level.format.slime;
 
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.format.LevelProvider;
-import cn.nukkit.level.format.generic.BaseRegionLoader;
 import cn.nukkit.utils.*;
 
 import java.io.EOFException;
+import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-/**
- * author: MagicDroidX
- * Nukkit Project
- */
-public class RegionLoader extends BaseRegionLoader {
-    public RegionLoader(LevelProvider level, int regionX, int regionZ) throws IOException {
-        super(level, regionX, regionZ, "mca");
+public class SlimeLoader {
+    protected final Map<Integer, Integer[]> locationTable = new HashMap<>();
+
+    public static final int VERSION = 1;
+    public static final byte COMPRESSION_GZIP = 1;
+    public static final byte COMPRESSION_ZLIB = 2;
+    public static final int MAX_SECTOR_LENGTH = 256 << 12;
+    public static final int COMPRESSION_LEVEL = 7;
+    
+    private long lastUsed = 0;
+
+    protected int x;
+    protected int z;
+    protected int lastSector;
+    protected LevelProvider levelProvider;
+
+    private RandomAccessFile randomAccessFile;
+
+    public SlimeLoader(String path, int regionX, int regionZ) throws IOException {
+        try {
+            this.x = regionX;
+            this.z = regionZ;
+
+            String filePath = path + "region/r." + regionX + "." + regionZ + "." + "mca";
+            File file = new File(filePath);
+            boolean exists = file.exists();
+            if (!exists) {
+                file.createNewFile();
+            }
+            // TODO: buffering is a temporary solution to chunk reading/writing being poorly optimized
+            //  - need to fix the code where it reads single bytes at a time from disk
+            this.randomAccessFile = new RandomAccessFile(filePath, "rw");
+            if (!exists) {
+                this.createBlank();
+            } else {
+                this.loadLocationTable();
+            }
+
+            this.lastUsed = System.currentTimeMillis();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    @Override
     protected boolean isChunkGenerated(int index) {
         Integer[] array = this.locationTable.get(index);
         return !(array[0] == 0 || array[1] == 0);
     }
 
-    @Override
-    public cn.nukkit.level.format.slime.Chunk readChunk(int x, int z) throws IOException {
+    
+    public Chunk readChunk(int x, int z) throws IOException {
         int index = getChunkOffset(x, z);
         if (index < 0 || index >= 4096) {
             return null;
@@ -42,61 +77,57 @@ public class RegionLoader extends BaseRegionLoader {
         }
 
         try {
-        Integer[] table = this.locationTable.get(index);
-        RandomAccessFile raf = this.getRandomAccessFile();
-        raf.seek(table[0] << 12);
-        int length = raf.readInt();
-        byte compression = raf.readByte();
-        if (length <= 0 || length >= MAX_SECTOR_LENGTH) {
-            if (length >= MAX_SECTOR_LENGTH) {
-                table[0] = ++this.lastSector;
-                table[1] = 1;
-                this.locationTable.put(index, table);
-                MainLogger.getLogger().error("Corrupted chunk header detected");
+            Integer[] table = this.locationTable.get(index);
+            RandomAccessFile raf = this.getRandomAccessFile();
+            raf.seek(table[0] << 12);
+            int length = raf.readInt();
+            byte compression = raf.readByte();
+            if (length <= 0 || length >= MAX_SECTOR_LENGTH) {
+                if (length >= MAX_SECTOR_LENGTH) {
+                    table[0] = ++this.lastSector;
+                    table[1] = 1;
+                    this.locationTable.put(index, table);
+                    MainLogger.getLogger().error("Corrupted chunk header detected");
+                }
+                return null;
             }
-            return null;
-        }
 
-        if (length > (table[1] << 12)) {
-            MainLogger.getLogger().error("Corrupted bigger chunk detected");
-            table[1] = length >> 12;
-            this.locationTable.put(index, table);
-            this.writeLocationIndex(index);
-        } else if (compression != COMPRESSION_ZLIB && compression != COMPRESSION_GZIP) {
-            MainLogger.getLogger().error("Invalid compression type");
-            return null;
-        }
+            if (length > (table[1] << 12)) {
+                MainLogger.getLogger().error("Corrupted bigger chunk detected");
+                table[1] = length >> 12;
+                this.locationTable.put(index, table);
+                this.writeLocationIndex(index);
+            } else if (compression != COMPRESSION_ZLIB && compression != COMPRESSION_GZIP) {
+                MainLogger.getLogger().error("Invalid compression type");
+                return null;
+            }
 
-        byte[] data = new byte[length - 1];
-        raf.readFully(data);
-            cn.nukkit.level.format.slime.Chunk chunk = this.unserializeChunk(data);
-        if (chunk != null) {
-            return chunk;
-        } else {
-            MainLogger.getLogger().error("Corrupted chunk detected at (" + x + ", " + z + ") in " + levelProvider.getName());
-            return null;
-        }
+            byte[] data = new byte[length - 1];
+            raf.readFully(data);
+            Chunk chunk = this.unserializeChunk(data);
+            if (chunk != null) {
+                return chunk;
+            } else {
+                MainLogger.getLogger().error("Corrupted chunk detected at (" + x + ", " + z + ") in " + levelProvider.getName());
+                return null;
+            }
         } catch (EOFException e) {
             MainLogger.getLogger().error("Your world is corrupt, because some code is bad and corrupted it. oops. ");
             return null;
         }
     }
 
-    @Override
-    protected cn.nukkit.level.format.slime.Chunk unserializeChunk(byte[] data) {
-        return cn.nukkit.level.format.slime.Chunk.fromBinary(0,data, this.levelProvider);
+    
+    protected Chunk unserializeChunk(byte[] data) {
+        return Chunk.fromBinary(0,data, this.levelProvider);
     }
 
-    protected cn.nukkit.level.format.slime.Chunk unserializeChunk(int length, byte[] data) {
-        return cn.nukkit.level.format.slime.Chunk.fromBinary(0,data, this.levelProvider);
-    }
-
-    @Override
+    
     public boolean chunkExists(int x, int z) {
         return this.isChunkGenerated(getChunkOffset(x, z));
     }
 
-    @Override
+    
     protected void saveChunk(int x, int z, byte[] chunkData) throws IOException {
         int length = chunkData.length + 1;
         if (length + 4 > MAX_SECTOR_LENGTH) {
@@ -141,7 +172,7 @@ public class RegionLoader extends BaseRegionLoader {
         }
     }
 
-    @Override
+    
     public void removeChunk(int x, int z) {
         int index = getChunkOffset(x, z);
         Integer[] table = this.locationTable.get(0);
@@ -150,7 +181,7 @@ public class RegionLoader extends BaseRegionLoader {
         this.locationTable.put(index, table);
     }
 
-    @Override
+    
     public void writeChunk(FullChunk chunk) throws Exception {
         this.lastUsed = System.currentTimeMillis();
         byte[] chunkData = chunk.toBinary();
@@ -161,14 +192,15 @@ public class RegionLoader extends BaseRegionLoader {
         return x | (z << 5);
     }
 
-    @Override
+    
     public void close() throws IOException {
         this.writeLocationTable();
         this.levelProvider = null;
-        super.close();
+        if (randomAccessFile != null)
+        this.randomAccessFile.close();
     }
 
-    @Override
+    
     public int doSlowCleanUp() throws Exception {
         RandomAccessFile raf = this.getRandomAccessFile();
         for (int i = 0; i < 1024; i++) {
@@ -213,7 +245,7 @@ public class RegionLoader extends BaseRegionLoader {
         return n;
     }
 
-    @Override
+    
     protected void loadLocationTable() throws IOException {
         RandomAccessFile raf = this.getRandomAccessFile();
         raf.seek(0);
@@ -288,7 +320,7 @@ public class RegionLoader extends BaseRegionLoader {
         return shift;
     }
 
-    @Override
+    
     protected void writeLocationIndex(int index) throws IOException {
         RandomAccessFile raf = this.getRandomAccessFile();
         Integer[] array = this.locationTable.get(index);
@@ -298,7 +330,7 @@ public class RegionLoader extends BaseRegionLoader {
         raf.writeInt(array[2]);
     }
 
-    @Override
+    
     protected void createBlank() throws IOException {
         RandomAccessFile raf = this.getRandomAccessFile();
         raf.seek(0);
@@ -314,12 +346,16 @@ public class RegionLoader extends BaseRegionLoader {
         }
     }
 
-    @Override
+    
     public int getX() {
         return x;
     }
 
-    @Override
+    public RandomAccessFile getRandomAccessFile() {
+        return randomAccessFile;
+    }
+
+
     public int getZ() {
         return z;
     }

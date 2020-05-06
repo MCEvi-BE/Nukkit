@@ -1,9 +1,9 @@
 package cn.nukkit.level.format.slime;
 
 import cn.nukkit.block.Block;
+import cn.nukkit.level.format.anvil.util.BlockStorage;
+import cn.nukkit.level.format.anvil.util.NibbleArray;
 import cn.nukkit.level.format.generic.EmptyChunkSection;
-import cn.nukkit.level.format.slime.util.BlockStorage;
-import cn.nukkit.level.format.slime.util.NibbleArray;
 import cn.nukkit.level.util.PalettedBlockStorage;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.*;
@@ -33,6 +33,7 @@ public class ChunkSection implements cn.nukkit.level.format.ChunkSection {
                          boolean hasBlockLight, boolean hasSkyLight) {
         this.y = y;
         this.storage = storage;
+        this.blockLight = blockLight;
         this.skyLight = skyLight;
         this.compressedLight = compressedLight;
         this.hasBlockLight = hasBlockLight;
@@ -370,5 +371,9 @@ public class ChunkSection implements cn.nukkit.level.format.ChunkSection {
                 this.hasBlockLight,
                 this.hasSkyLight
         );
+    }
+
+    public BlockStorage getStorage() {
+        return storage;
     }
 }

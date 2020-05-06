@@ -6,14 +6,15 @@ import cn.nukkit.block.Block;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.level.format.LevelProvider;
+import cn.nukkit.level.format.anvil.palette.BiomePalette;
 import cn.nukkit.level.format.generic.BaseChunk;
 import cn.nukkit.level.format.generic.EmptyChunkSection;
-import cn.nukkit.level.format.slime.palette.BiomePalette;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.*;
 import cn.nukkit.utils.BinaryStream;
 import cn.nukkit.utils.BlockUpdateEntry;
 import cn.nukkit.utils.ChunkException;
+import cn.nukkit.utils.Zlib;
 import com.github.luben.zstd.Zstd;
 
 
@@ -220,12 +221,13 @@ public class Chunk extends BaseChunk {
     }
 
     public static Chunk fromBinary(byte[] data) {
-        return fromBinary(data, null);
+        return fromBinary(0,data, null);
     }
 
-    public static Chunk fromBinary(byte[] data, LevelProvider provider) {
+    public static Chunk fromBinary(int length, byte[] data, LevelProvider provider) {
         try {
-            CompoundTag chunk = NBTIO.read(new ByteArrayInputStream(Zstd.decompress(data, RegionLoader.COMPRESSION_LEVEL)), ByteOrder.BIG_ENDIAN);
+
+            CompoundTag chunk = NBTIO.read(new ByteArrayInputStream(Zlib.inflate(data)), ByteOrder.BIG_ENDIAN);
 
             if (!chunk.contains("Level") || !(chunk.get("Level") instanceof CompoundTag)) {
                 return null;
@@ -276,6 +278,7 @@ public class Chunk extends BaseChunk {
             if (section instanceof EmptyChunkSection) {
                 continue;
             }
+
             CompoundTag s = new CompoundTag(null);
             s.putByte("Y", section.getY());
             s.putByteArray("Blocks", section.getIdArray());
@@ -384,6 +387,7 @@ public class Chunk extends BaseChunk {
                 entities.add(entity.namedTag);
             }
         }
+
         ListTag<CompoundTag> entityListTag = new ListTag<>("Entities");
         entityListTag.setAll(entities);
         nbt.putList(entityListTag);

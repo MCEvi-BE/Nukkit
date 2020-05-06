@@ -32,7 +32,7 @@ public final class CustomLevel extends Level {
 
     private final Object saveLock = new Object();
 
-    private final List<WorldMap> maps = new ArrayList<>();
+  //  private final List<WorldMap> maps = new ArrayList<>();
 
     @Getter
     @Setter
@@ -52,17 +52,20 @@ public final class CustomLevel extends Level {
         new File(newbase, "region").delete();
         newbase.delete();
         newbase.getParentFile().delete();
+        /*
         for (final CompoundTag mapTag : world.getWorldMaps()) {
             final int id = mapTag.getInt("id");
             final WorldMap map = new WorldMap("map_" + id);
             map.a(mapTag);
             a(map);
         }
+
+         */
     }
 
     @Override
     public boolean save(final boolean force) {
-
+        return false;
     }
 
 }
