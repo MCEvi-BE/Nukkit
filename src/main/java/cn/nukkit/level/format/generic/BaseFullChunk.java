@@ -58,15 +58,31 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
     protected LevelProvider provider;
     protected Class<? extends LevelProvider> providerClass;
 
-    private int x;
-    private int z;
-    private long hash;
+    protected int x;
+    protected int z;
+    protected long hash;
 
     protected long changes;
 
     protected boolean isInit;
 
     protected BatchPacket chunkPacket;
+
+    public BaseFullChunk() {
+    }
+
+    public BaseFullChunk(int x, int z, byte[] biomes, byte[] blocks, byte[] data, byte[] skyLight, byte[] blockLight, byte[] heightMap, List<CompoundTag> NBTtiles, List<CompoundTag> NBTentities) {
+        this.biomes = biomes;
+        this.blocks = blocks;
+        this.data = data;
+        this.skyLight = skyLight;
+        this.blockLight = blockLight;
+        this.heightMap = heightMap;
+        this.x = x;
+        this.z = z;
+        this.NBTtiles = NBTtiles;
+        this.NBTentities = NBTentities;
+    }
 
     @Override
     public BaseFullChunk clone() {
@@ -315,6 +331,14 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
         if (!(entity instanceof Player) && this.isInit) {
             this.setChanged();
         }
+    }
+
+    public List<CompoundTag> getNBTtiles() {
+        return NBTtiles;
+    }
+
+    public List<CompoundTag> getNBTentities() {
+        return NBTentities;
     }
 
     @Override

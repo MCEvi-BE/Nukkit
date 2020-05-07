@@ -17,7 +17,7 @@ public class BlockStorage {
         blockData = new NibbleArray(SECTION_SIZE);
     }
 
-    private BlockStorage(byte[] blockIds, NibbleArray blockData) {
+    public BlockStorage(byte[] blockIds, NibbleArray blockData) {
         this.blockIds = blockIds;
         this.blockData = blockData;
     }

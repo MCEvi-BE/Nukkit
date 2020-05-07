@@ -40,6 +40,10 @@ public class Chunk extends BaseChunk {
         return (Chunk) super.clone();
     }
 
+    public Chunk(int x, int z, byte[] biomes, byte[] blocks, byte[] data, byte[] skyLight, byte[] blockLight, byte[] heightMap, List<CompoundTag> NBTtiles, List<CompoundTag> NBTentities, cn.nukkit.level.format.ChunkSection[] sections) {
+        super(x, z, biomes, blocks, data, skyLight, blockLight, heightMap, NBTtiles, NBTentities, sections);
+    }
+
     public Chunk(LevelProvider level) {
         this(level, null);
     }
@@ -53,6 +57,39 @@ public class Chunk extends BaseChunk {
         this((LevelProvider) null, nbt);
         this.providerClass = providerClass;
     }
+
+
+
+    public Chunk(int x, int z, byte[] heightMap, byte[] biomes, ChunkSection[] sections) {
+
+        this.x = x;
+        this.z = z;
+        if (sections == null) {
+            this.biomes = new byte[16 * 16];
+            this.sections = new cn.nukkit.level.format.ChunkSection[16];
+            System.arraycopy(EmptyChunkSection.EMPTY, 0, this.sections, 0, 16);
+            return;
+        }
+
+        if (heightMap == null) {
+            this.heightMap = new byte[256];
+        } else {
+            this.heightMap = heightMap;
+        }
+
+        if (biomes == null) {
+            this.biomes = new byte[256];
+        } else {
+            this.biomes = biomes;
+        }
+
+        this.NBTentities = new ArrayList<>();
+        this.NBTtiles = new ArrayList<>();
+        this.sections = sections;
+
+
+    }
+
 
     public Chunk(LevelProvider level, CompoundTag nbt) {
         this.provider = level;
@@ -128,6 +165,7 @@ public class Chunk extends BaseChunk {
 
         this.NBTentities = nbt.getList("Entities", CompoundTag.class).getAll();
         this.NBTtiles = nbt.getList("TileEntities", CompoundTag.class).getAll();
+
         if (this.NBTentities.isEmpty()) this.NBTentities = null;
         if (this.NBTtiles.isEmpty()) this.NBTtiles = null;
 
@@ -169,6 +207,8 @@ public class Chunk extends BaseChunk {
         this.terrainPopulated = nbt.getBoolean("TerrainPopulated");
         this.terrainGenerated = nbt.getBoolean("TerrainGenerated");
     }
+
+
 
     @Override
     public boolean isPopulated() {

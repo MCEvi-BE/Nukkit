@@ -1,6 +1,5 @@
 package cn.nukkit.level.format.anvil.util;
 
-
 import com.google.common.base.Preconditions;
 
 public class NibbleArray implements Cloneable {

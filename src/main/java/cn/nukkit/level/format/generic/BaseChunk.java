@@ -6,12 +6,14 @@ import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.level.format.Chunk;
 import cn.nukkit.level.format.ChunkSection;
 import cn.nukkit.level.format.LevelProvider;
+import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.ChunkException;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * author: MagicDroidX
@@ -21,6 +23,15 @@ import java.util.Arrays;
 public abstract class BaseChunk extends BaseFullChunk implements Chunk {
 
     protected ChunkSection[] sections;
+
+
+    public BaseChunk() {
+    }
+
+    public BaseChunk(int x, int z, byte[] biomes, byte[] blocks, byte[] data, byte[] skyLight, byte[] blockLight, byte[] heightMap, List<CompoundTag> NBTtiles, List<CompoundTag> NBTentities, ChunkSection[] sections) {
+        super(x, z, biomes, blocks, data, skyLight, blockLight, heightMap, NBTtiles, NBTentities);
+        this.sections = sections;
+    }
 
     @Override
     public BaseChunk clone() {

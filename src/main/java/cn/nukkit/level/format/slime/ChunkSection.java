@@ -29,7 +29,7 @@ public class ChunkSection implements cn.nukkit.level.format.ChunkSection {
     protected boolean hasBlockLight;
     protected boolean hasSkyLight;
 
-    private ChunkSection(int y, BlockStorage storage, byte[] blockLight, byte[] skyLight, byte[] compressedLight,
+    public ChunkSection(int y, BlockStorage storage, byte[] blockLight, byte[] skyLight, byte[] compressedLight,
                          boolean hasBlockLight, boolean hasSkyLight) {
         this.y = y;
         this.storage = storage;
@@ -39,6 +39,8 @@ public class ChunkSection implements cn.nukkit.level.format.ChunkSection {
         this.hasBlockLight = hasBlockLight;
         this.hasSkyLight = hasSkyLight;
     }
+
+
 
     public ChunkSection(int y) {
         this.y = y;
