@@ -7,7 +7,8 @@ package cn.nukkit.swm.api.exceptions;
  */
 public class NewerFormatException extends SlimeException {
 
-    public NewerFormatException(byte version) {
+    public NewerFormatException(final byte version) {
         super("v" + version);
     }
+
 }

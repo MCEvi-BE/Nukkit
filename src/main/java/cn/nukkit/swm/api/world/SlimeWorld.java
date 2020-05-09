@@ -4,12 +4,11 @@ import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.swm.api.exceptions.WorldAlreadyExistsException;
 import cn.nukkit.swm.api.loaders.SlimeLoader;
 import cn.nukkit.swm.api.world.properties.SlimePropertyMap;
+import java.io.IOException;
+import java.util.Collection;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.experimental.Accessors;
-
-import java.io.IOException;
-import java.util.Collection;
 
 /**
  * In-memory representation of a SRF world.
@@ -61,11 +60,11 @@ public interface SlimeWorld {
      * Returns the properties of the world. These properties are automatically
      * kept up-to-date when the world is loaded and its properties are updated.
      *
-     * @return A {@link SlimeProperties} object with all the current properties of the world.
+     * @return A {@link SlimeWorld.SlimeProperties} object with all the current properties of the world.
      * @deprecated see {@link #getPropertyMap()}.
      */
     @Deprecated
-    SlimeProperties getProperties();
+    SlimeWorld.SlimeProperties getProperties();
 
     /**
      * Returns the property map.
@@ -96,11 +95,11 @@ public interface SlimeWorld {
      * automatically stored inside the provided data source.
      *
      * @param worldName The name of the cloned world.
-     * @param loader    The {@link SlimeLoader} used to store the world or <code>null</code> if the world is temporary.
+     * @param loader The {@link SlimeLoader} used to store the world or <code>null</code> if the world is temporary.
      * @return The clone of the world.
-     * @throws IllegalArgumentException    if the name of the world is the same as the current one or is <code>null</code>.
+     * @throws IllegalArgumentException if the name of the world is the same as the current one or is <code>null</code>.
      * @throws WorldAlreadyExistsException if there's already a world with the same name inside the provided data source.
-     * @throws IOException                 if the world could not be stored.
+     * @throws IOException if the world could not be stored.
      */
     SlimeWorld clone(String worldName, SlimeLoader loader) throws WorldAlreadyExistsException, IOException;
 
@@ -109,12 +108,12 @@ public interface SlimeWorld {
      * automatically stored inside the provided data source.
      *
      * @param worldName The name of the cloned world.
-     * @param loader    The {@link SlimeLoader} used to store the world or <code>null</code> if the world is temporary.
-     * @param lock      whether or not SWM should lock the world. If false, SWM will not let you load this world for security reasons.
+     * @param loader The {@link SlimeLoader} used to store the world or <code>null</code> if the world is temporary.
+     * @param lock whether or not SWM should lock the world. If false, SWM will not let you load this world for security reasons.
      * @return The clone of the world.
-     * @throws IllegalArgumentException    if the name of the world is the same as the current one or is <code>null</code>.
+     * @throws IllegalArgumentException if the name of the world is the same as the current one or is <code>null</code>.
      * @throws WorldAlreadyExistsException if there's already a world with the same name inside the provided data source.
-     * @throws IOException                 if the world could not be stored.
+     * @throws IOException if the world could not be stored.
      */
     SlimeWorld clone(String worldName, SlimeLoader loader, boolean lock) throws WorldAlreadyExistsException, IOException;
 
@@ -137,8 +136,10 @@ public interface SlimeWorld {
     class SlimeProperties {
 
         private final double spawnX;
+
         @Builder.Default
         private final double spawnY = 255;
+
         private final double spawnZ;
 
         private final int difficulty;
@@ -146,6 +147,7 @@ public interface SlimeWorld {
         @Accessors(fluent = true)
         @Builder.Default
         private final boolean allowMonsters = true;
+
         @Accessors(fluent = true)
         @Builder.Default
         private final boolean allowAnimals = true;
@@ -157,5 +159,7 @@ public interface SlimeWorld {
 
         @Builder.Default
         private final String environment = "NORMAL";
+
     }
+
 }

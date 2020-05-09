@@ -6,7 +6,8 @@ package cn.nukkit.swm.api.exceptions;
  */
 public class WorldLoadedException extends SlimeException {
 
-    public WorldLoadedException(String worldName) {
+    public WorldLoadedException(final String worldName) {
         super("World " + worldName + " is loaded! Unload it before importing it.");
     }
+
 }

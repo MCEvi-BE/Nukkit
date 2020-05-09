@@ -8,7 +8,8 @@ import java.io.File;
  */
 public class InvalidWorldException extends SlimeException {
 
-    public InvalidWorldException(File worldDir) {
+    public InvalidWorldException(final File worldDir) {
         super("Directory " + worldDir.getPath() + " does not contain a valid MC world!");
     }
+
 }

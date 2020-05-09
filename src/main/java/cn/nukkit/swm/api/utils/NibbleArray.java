@@ -10,28 +10,29 @@ import lombok.Getter;
 public class NibbleArray {
 
     private final int size;
+
     @Getter
     private final byte[] backing;
 
-    public NibbleArray(int size) {
+    public NibbleArray(final int size) {
         this(new byte[size / 2]);
     }
 
-    public NibbleArray(byte[] backing) {
+    public NibbleArray(final byte[] backing) {
         this.backing = backing;
         this.size = backing.length * 2;
     }
 
-    public int get(int index) {
-        int value = this.backing[index / 2];
+    public int get(final int index) {
+        final int value = this.backing[index / 2];
 
         return index % 2 == 0 ? value & 0xF : (value & 0xF0) >> 4;
     }
 
-    public void set(int index, int value) {
-        int nibble = value & 0xF;
-        int halfIndex = index / 2;
-        int previous = this.backing[halfIndex];
+    public void set(final int index, final int value) {
+        final int nibble = value & 0xF;
+        final int halfIndex = index / 2;
+        final int previous = this.backing[halfIndex];
 
         if (index % 2 == 0) {
             this.backing[halfIndex] = (byte) (previous & 0xF0 | nibble);
@@ -39,4 +40,5 @@ public class NibbleArray {
             this.backing[halfIndex] = (byte) (previous & 0xF | nibble << 4);
         }
     }
+
 }

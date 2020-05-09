@@ -5,14 +5,11 @@ import cn.nukkit.level.GameRule;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.format.LevelProvider;
 import cn.nukkit.math.Vector3;
-import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.swm.api.world.properties.SlimeProperties;
 import cn.nukkit.swm.api.world.properties.SlimePropertyMap;
 import cn.nukkit.swm.common.CraftSlimeWorld;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import lombok.Getter;
@@ -32,7 +29,7 @@ public final class CustomLevel extends Level {
 
     private final Object saveLock = new Object();
 
-  //  private final List<WorldMap> maps = new ArrayList<>();
+    //  private final List<WorldMap> maps = new ArrayList<>();
 
     @Getter
     @Setter

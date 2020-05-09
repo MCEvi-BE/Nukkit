@@ -5,11 +5,12 @@ package cn.nukkit.swm.api.exceptions;
  */
 public class SlimeException extends Exception {
 
-    public SlimeException(String message) {
+    public SlimeException(final String message) {
         super(message);
     }
 
-    public SlimeException(String message, Exception ex) {
+    public SlimeException(final String message, final Exception ex) {
         super(message, ex);
     }
+
 }
