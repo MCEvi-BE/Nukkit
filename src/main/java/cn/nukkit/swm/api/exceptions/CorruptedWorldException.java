@@ -6,11 +6,12 @@ package cn.nukkit.swm.api.exceptions;
  */
 public class CorruptedWorldException extends SlimeException {
 
-    public CorruptedWorldException(String world) {
+    public CorruptedWorldException(final String world) {
         this(world, null);
     }
 
-    public CorruptedWorldException(String world, Exception ex) {
+    public CorruptedWorldException(final String world, final Exception ex) {
         super("World " + world + " seems to be corrupted", ex);
     }
+
 }

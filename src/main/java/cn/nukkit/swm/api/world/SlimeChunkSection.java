@@ -54,4 +54,5 @@ public interface SlimeChunkSection {
      * @return A {@link NibbleArray} containing the sky light data.
      */
     NibbleArray getSkyLight();
+
 }

@@ -1,7 +1,6 @@
 package cn.nukkit.swm.api.world;
 
 import cn.nukkit.nbt.tag.CompoundTag;
-
 import java.util.List;
 
 /**
@@ -68,4 +67,5 @@ public interface SlimeChunk {
      * @return A {@link CompoundTag} containing all the entities of the chunk.
      */
     List<CompoundTag> getEntities();
+
 }

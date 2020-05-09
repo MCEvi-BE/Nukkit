@@ -6,7 +6,8 @@ package cn.nukkit.swm.api.exceptions;
  */
 public class WorldInUseException extends SlimeException {
 
-    public WorldInUseException(String world) {
+    public WorldInUseException(final String world) {
         super(world);
     }
+
 }

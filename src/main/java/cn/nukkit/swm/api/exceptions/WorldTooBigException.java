@@ -6,7 +6,8 @@ package cn.nukkit.swm.api.exceptions;
  */
 public class WorldTooBigException extends SlimeException {
 
-    public WorldTooBigException(String worldName) {
+    public WorldTooBigException(final String worldName) {
         super("World " + worldName + " is too big to be converted into the SRF!");
     }
+
 }

@@ -6,7 +6,8 @@ package cn.nukkit.swm.api.exceptions;
  */
 public class UnknownWorldException extends SlimeException {
 
-    public UnknownWorldException(String world) {
+    public UnknownWorldException(final String world) {
         super("Unknown world " + world);
     }
+
 }

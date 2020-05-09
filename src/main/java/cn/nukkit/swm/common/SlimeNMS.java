@@ -10,11 +10,11 @@ public interface SlimeNMS {
 
     void generateWorld(SlimeWorld world);
 
-    default Object createNMSWorld(SlimeWorld world) {
+    default Object createNMSWorld(final SlimeWorld world) {
         throw new UnsupportedOperationException("This spigot version does not support async world loading");
     }
 
-    default void addWorldToServerList(Object worldObject) {
+    default void addWorldToServerList(final Object worldObject) {
         throw new UnsupportedOperationException("This spigot version does not support async world loading");
     }
 
@@ -22,7 +22,8 @@ public interface SlimeNMS {
 
     byte getWorldVersion();
 
-    default CompoundTag convertChunk(CompoundTag chunkTag) {
+    default CompoundTag convertChunk(final CompoundTag chunkTag) {
         return chunkTag;
     }
+
 }

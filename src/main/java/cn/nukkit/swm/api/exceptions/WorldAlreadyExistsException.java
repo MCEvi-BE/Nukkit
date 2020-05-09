@@ -6,7 +6,8 @@ package cn.nukkit.swm.api.exceptions;
  */
 public class WorldAlreadyExistsException extends SlimeException {
 
-    public WorldAlreadyExistsException(String world) {
+    public WorldAlreadyExistsException(final String world) {
         super("World " + world + " already exists!");
     }
+
 }

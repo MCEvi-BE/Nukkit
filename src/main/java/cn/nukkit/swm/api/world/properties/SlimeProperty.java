@@ -1,8 +1,7 @@
 package cn.nukkit.swm.api.world.properties;
 
-import lombok.Getter;
-
 import java.util.function.Function;
+import lombok.Getter;
 
 /**
  * A property object.
@@ -11,15 +10,18 @@ import java.util.function.Function;
 public class SlimeProperty {
 
     private final String nbtName;
+
     private final PropertyType type;
+
     private final Object defaultValue;
+
     private final Function<Object, Boolean> validator;
 
-    SlimeProperty(String nbtName, PropertyType type, Object defaultValue) {
+    SlimeProperty(final String nbtName, final PropertyType type, final Object defaultValue) {
         this(nbtName, type, defaultValue, null);
     }
 
-    SlimeProperty(String nbtName, PropertyType type, Object defaultValue, Function<Object, Boolean> validator) {
+    SlimeProperty(final String nbtName, final PropertyType type, final Object defaultValue, final Function<Object, Boolean> validator) {
         this.nbtName = nbtName;
         this.type = type;
 
@@ -38,4 +40,5 @@ public class SlimeProperty {
         this.defaultValue = defaultValue;
         this.validator = validator;
     }
+
 }
