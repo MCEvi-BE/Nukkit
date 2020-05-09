@@ -28,7 +28,10 @@ public class TestSerialize {
         chunks.add(new Chunk(0,1));
         chunks.add(new Chunk(2,2));
 
-        byte[] data = serialize(chunks);
+        CompoundTag test = new CompoundTag();
+        test.putString("test", "lo test lo mest lo");
+
+        byte[] data = serialize(chunks, test, new ArrayList<>());
 
         deserialize(data);
 
@@ -88,17 +91,39 @@ public class TestSerialize {
 
             stream.read(compressedEntities);
         }
-
-        System.out.println("read "+compressedEntities.length);
-
         //Entities-------------------------------------
 
 
+        //Extra-------------------------------------
+        byte[] compressedExtraTag = new byte[0];
+        byte[] extraTag = new byte[0];
+
+        int compressedExtraTagLength = stream.readInt();
+        int extraTagLength = stream.readInt();
+        compressedExtraTag = new byte[compressedExtraTagLength];
+        extraTag = new byte[extraTagLength];
+
+        stream.read(compressedExtraTag);
+        //Extra-------------------------------------
+
+
+        //LevelDat-------------------------------------
+        byte[] compressedMapsTag = new byte[0];
+        byte[] mapsTag = new byte[0];
+
+        int compressedMapsTagLength = stream.readInt();
+        int mapsTagLength = stream.readInt();
+        compressedMapsTag = new byte[compressedMapsTagLength];
+        mapsTag = new byte[mapsTagLength];
+
+        stream.read(compressedMapsTag);
+
+        //LevelDat-------------------------------------
 
 
     }
 
-    public static byte[] serialize(List<Chunk> chunks) throws Exception{
+    public static byte[] serialize(List<Chunk> chunks, CompoundTag extraCompound, List<CompoundTag> worldMap) throws Exception{
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         DataOutputStream outStream = new DataOutputStream(stream);
 
@@ -174,12 +199,34 @@ public class TestSerialize {
             outStream.writeInt(entitiesData.length);
             outStream.write(compressedEntitiesData);
         }
-
-        System.out.println("write "+compressed);
         //Entities-------------------------------------
 
 
 
+        //Extra-------------------------------------
+        byte[] extra = NBTIO.write(extraCompound, ByteOrder.BIG_ENDIAN);
+        byte[] compressedExtra = Zstd.compress(extra);
+
+        outStream.writeInt(compressedExtra.length);
+        outStream.writeInt(extra.length);
+        outStream.write(compressedExtra);
+        //Extra-------------------------------------
+
+        //LevelDat-------------------------------------
+
+        ListTag<CompoundTag> mapList = new ListTag<>("maps");
+        mapList.setAll(worldMap);
+
+        CompoundTag mapsCompound = new CompoundTag("");
+        mapsCompound.putList(mapList);
+
+        byte[] mapArray = NBTIO.write(mapsCompound, ByteOrder.BIG_ENDIAN);
+        byte[] compressedMapArray = Zstd.compress(mapArray);
+
+        outStream.writeInt(compressedMapArray.length);
+        outStream.writeInt(mapArray.length);
+        outStream.write(compressedMapArray);
+        //LevelDat-------------------------------------
 
 
         return stream.toByteArray();
