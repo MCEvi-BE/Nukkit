@@ -1,18 +1,19 @@
 package cn.nukkit.level.format.river.serialize;
 
+import cn.nukkit.Player;
 import cn.nukkit.level.format.ChunkSection;
+import cn.nukkit.level.format.anvil.util.BlockStorage;
+import cn.nukkit.level.format.anvil.util.NibbleArray;
 import cn.nukkit.level.format.river.Chunk;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
+import cn.nukkit.nbt.tag.DoubleTag;
 import cn.nukkit.nbt.tag.ListTag;
 import com.github.luben.zstd.Zstd;
 
 import java.io.*;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.List;
+import java.util.*;
 
 public class TestSerialize {
 
@@ -121,7 +122,106 @@ public class TestSerialize {
         //LevelDat-------------------------------------
 
 
+
+
+        //Decompress-------------------------------------
+        Zstd.decompress(chunkData, compressedChunkData);
+        Zstd.decompress(tileEntities, compressedTileEntities);
+        Zstd.decompress(entities, compressedEntities);
+        Zstd.decompress(extraTag, compressedExtraTag);
+        Zstd.decompress(mapsTag, compressedMapsTag);
+        //Decompress-------------------------------------
+
+        //Chunk deserialization-------------------------------------
+        Map<Long, Chunk> chunks = readChunks(minX, minZ, width, depth, chunkBitset, chunkData);
+        //Chunk deserialization-------------------------------------
+
+
+        //Entities
+        CompoundTag entitiesCompound = NBTIO.read(entities, ByteOrder.BIG_ENDIAN);
+
+        ListTag<CompoundTag> entitiesList = entitiesCompound.getList("entities", CompoundTag.class);
+
+        for (CompoundTag tag : entitiesList.getAll())
+        {
+            ListTag<DoubleTag> listTag = tag.getList("Pos", DoubleTag.class);
+
+            int chunkX = floor(listTag.get(0).getData()) >> 4;
+            int chunkZ = floor(listTag.get(2).getData()) >> 4;
+            long chunkKey = ((long) chunkZ) * Integer.MAX_VALUE + ((long) chunkX);
+            Chunk chunk = chunks.get(chunkKey);
+
+            if (chunk == null) {
+                throw new Exception("fuck entity");
+            }
+
+            chunk.getNBTentities().add(tag);
+        }
+
+
+        // Tile Entity deserialization
+        CompoundTag tileEntitiesCompound = NBTIO.read(tileEntities);
+
+        if (tileEntitiesCompound != null) {
+            ListTag<CompoundTag> tileEntitiesList = tileEntitiesCompound.getList("tiles",CompoundTag.class);
+
+            for (CompoundTag tileEntityCompound : tileEntitiesList.getAll()) {
+
+                int chunkX = tileEntitiesCompound.getInt("x") >> 4;
+                int chunkZ = tileEntitiesCompound.getInt("x") >> 4;
+
+
+                long chunkKey = ((long) chunkZ) * Integer.MAX_VALUE + ((long) chunkX);
+                Chunk chunk = chunks.get(chunkKey);
+
+                if (chunk == null) {
+                    throw new Exception("fuck tile entity");
+                }
+
+                chunk.getNBTtiles().add(tileEntityCompound);
+            }
+        }
+
+
+        // Extra Data
+        CompoundTag extraCompound = NBTIO.read(extraTag);
+
+        if (extraCompound == null) {
+            extraCompound = new CompoundTag("");
+        }
+
+        // World Maps
+        CompoundTag mapsCompound = NBTIO.read(mapsTag, ByteOrder.BIG_ENDIAN);
+        List<CompoundTag> mapList = new ArrayList<>();
+
+        if (mapsCompound != null) {
+            mapList = mapsCompound.getList("maps", CompoundTag.class).getAll();
+        }
+
+
+        // World properties
+
+
+        int compressedMapArrayLength = stream.readInt();
+        int MapArrayLength = stream.readInt();
+
+        byte[] compressedMapArray = new byte[compressedMapArrayLength];
+        byte[] mapArray = new byte[MapArrayLength];
+        stream.read(compressedMapArray);
+
+
+        Zstd.decompress(compressedMapArray, MapArrayLength);
+
+        CompoundTag map = NBTIO.read(mapArray);
+
     }
+
+
+    private static int floor(double num) {
+        final int floor = (int) num;
+        return floor == num ? floor : floor - (int) (Double.doubleToRawLongBits(num) >>> 63);
+    }
+
 
     public static byte[] serialize(List<Chunk> chunks, CompoundTag extraCompound, List<CompoundTag> worldMap) throws Exception{
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -183,7 +283,7 @@ public class TestSerialize {
         //Entities-------------------------------------
         List<CompoundTag> entitiesList = new ArrayList<>();
         chunks.forEach(chunk -> {
-            chunk.getEntities().values().forEach(entity -> {
+            chunk.getEntities().values().stream().filter(entity -> !(entity instanceof Player) && !entity.isClosed()).forEach(entity -> {
                 entity.saveNBT();
                 entitiesList.add(entity.namedTag);
             });
@@ -310,4 +410,85 @@ public class TestSerialize {
     }
 
 
+
+    public static Map<Long, Chunk> readChunks(int minX, int minZ, int width, int depth, BitSet chunkBitSet, byte[] chunkData) throws Exception{
+        DataInputStream dataStream = new DataInputStream(new ByteArrayInputStream(chunkData));
+        Map<Long, Chunk> chunkMap = new HashMap<>();
+
+
+        for (int z = 0; z < depth; z++) {
+            for (int x = 0; x < width; x++) {
+
+                int bitsetIndex = z * width + x;
+
+                if (chunkBitSet.get(bitsetIndex))
+                {
+
+                    byte[] heightMap = new byte[256];
+                    for (int i = 0; i < 256; i++) {
+                        heightMap[i] = dataStream.readByte();
+                    }
+
+                    int biomeLength = dataStream.readInt();
+                    byte[] biomeMap = new byte[biomeLength];
+
+                    for (int i = 0; i < biomeLength; i++) {
+                        biomeMap[i] = dataStream.readByte();
+                    }
+
+
+                    ChunkSection[] sections = readChunkSections(dataStream);
+
+                    chunkMap.put(((long) minZ + z) * Integer.MAX_VALUE + ((long) minX + x),
+                            new Chunk(minX + x, minZ + z,sections, heightMap, biomeMap));
+
+                }
+
+            }
+        }
+
+        return chunkMap;
+    }
+
+
+
+    private static ChunkSection[] readChunkSections(DataInputStream dataStream) throws Exception {
+
+
+        ChunkSection[] chunkSectionArray = new ChunkSection[16];
+        byte[] sectionBitmask = new byte[2];
+        dataStream.read(sectionBitmask);
+        BitSet sectionBitset = BitSet.valueOf(sectionBitmask);
+
+        for (int i = 0; i < 16; i++) {
+            if (sectionBitset.get(i))
+            {
+
+                byte[] blockLight = new byte[2048];
+                boolean hasBlockLight = dataStream.readBoolean();
+
+                if (hasBlockLight) {
+                    dataStream.read(blockLight);
+                }
+
+                byte[] blockArray = new byte[4096];
+                dataStream.read(blockArray);
+
+                byte[] dataArray = new byte[2048];
+                dataStream.read(dataArray);
+
+                boolean hasSkyLight = dataStream.readBoolean();
+                byte[] skyLight = new byte[2048];
+                if (hasSkyLight) {
+                    dataStream.read(skyLight);
+                }
+
+                chunkSectionArray[i] = new cn.nukkit.level.format.river.ChunkSection(i, new BlockStorage(blockArray, new NibbleArray(dataArray)) , blockLight, skyLight, null, hasBlockLight,hasSkyLight);
+
+            }
+        }
+
+
+        return chunkSectionArray;
+    }
 }
