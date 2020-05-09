@@ -17,6 +17,16 @@ public class EmptyChunkSection implements ChunkSection {
     public static final EmptyChunkSection[] EMPTY = new EmptyChunkSection[16];
     private static final PalettedBlockStorage EMPTY_STORAGE = new PalettedBlockStorage(BitArrayVersion.V1);
 
+    @Override
+    public boolean hasBlockLight() {
+        return false;
+    }
+
+    @Override
+    public boolean hasSkyLight() {
+        return false;
+    }
+
     static {
         for (int y = 0; y < EMPTY.length; y++) {
             EMPTY[y] = new EmptyChunkSection(y);

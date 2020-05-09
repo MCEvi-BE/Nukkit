@@ -363,6 +363,16 @@ public class ChunkSection implements cn.nukkit.level.format.ChunkSection {
         return false;
     }
 
+    @Override
+    public boolean hasBlockLight() {
+        return hasBlockLight;
+    }
+
+    @Override
+    public boolean hasSkyLight() {
+        return hasSkyLight;
+    }
+
     public ChunkSection copy() {
         return new ChunkSection(
                 this.y,

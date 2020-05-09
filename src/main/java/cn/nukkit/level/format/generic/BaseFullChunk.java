@@ -402,6 +402,8 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
         return this.tileList != null ? this.tileList.get((z << 12) | (x << 8) | y) : null;
     }
 
+
+
     @Override
     public boolean isLoaded() {
         return this.getProvider() != null && this.getProvider().isChunkLoaded(this.getX(), this.getZ());

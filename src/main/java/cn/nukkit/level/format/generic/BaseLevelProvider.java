@@ -46,6 +46,24 @@ public abstract class BaseLevelProvider implements LevelProvider {
 
     private final AtomicReference<BaseFullChunk> lastChunk = new AtomicReference<>();
 
+    public BaseLevelProvider(Level level, String path, boolean f) throws IOException {
+
+        this.level =level;
+        this.path = path;
+
+
+        if (!new File("fastworld/").exists())
+            new File("fastworld/").mkdir();
+
+        System.out.println(path);
+        if (!new File("fastworld/"+path+".world").exists()) {
+            new File("fastworld/"+path+".world").createNewFile();
+        }
+
+
+        this.spawn = new Vector3(256, 90, 256);
+    }
+
     public BaseLevelProvider(Level level, String path) throws IOException {
         this.level = level;
         this.path = path;
@@ -117,6 +135,7 @@ public abstract class BaseLevelProvider implements LevelProvider {
     public void putChunk(long index, BaseFullChunk chunk) {
         synchronized (chunks) {
             chunks.put(index, chunk);
+
         }
     }
 

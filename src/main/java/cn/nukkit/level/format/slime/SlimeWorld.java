@@ -58,13 +58,7 @@ public class SlimeWorld {
         return version;
     }
 
-    public static void main(String[] args) throws Exception {
-
-
-
-        System.out.println("======== SAVE  ======");
-        savetest();
-        System.out.println("======== SAVE  ======");
+    public static void maijn(String[] args) throws Exception {
 
         System.out.println("======== LOAD  ======");
         loadtest();
@@ -72,7 +66,7 @@ public class SlimeWorld {
     }
 
     public static void loadtest() throws Exception {
-        RandomAccessFile file = new RandomAccessFile(new File("/Users/cinax/Desktop/seksi.world"), "rw");
+        RandomAccessFile file = new RandomAccessFile(new File("/Users/cinax/Desktop/world.slime"), "rw");
 
         byte[] serializedWorld = new byte[(int) file.length()];
         file.seek(0); // Make sure we're at the start of the file
@@ -144,6 +138,7 @@ public class SlimeWorld {
         synchronized (chunks) {
             chunks.put(((long) chunk.getZ()) * Integer.MAX_VALUE + ((long) chunk.getX()), chunk);
         }
+
     }
 
 
@@ -325,6 +320,7 @@ public class SlimeWorld {
             if (!Arrays.equals(SLIME_HEADER, fileHeader)) {
                 throw new Exception("HEADER ERROR " + worldName);
             }
+
             de(11);
             byte worldVersion = dataStream.readByte();
 
@@ -504,13 +500,8 @@ public class SlimeWorld {
 
             return new SlimeWorld(chunks, extraCompound, mapList, (byte) 0);
         } catch (Exception e) {
-
+            System.out.println(e);
         }
-
-
-
-
-
 
         return new SlimeWorld();
     }
@@ -710,6 +701,15 @@ public class SlimeWorld {
         }
 
         return chunkMap;
+    }
+
+
+    public Chunk getChunk(int x, int z) {
+        synchronized (chunks) {
+            Long index = (((long) z) * Integer.MAX_VALUE + ((long) x));
+
+            return chunks.get(index);
+        }
     }
 
 

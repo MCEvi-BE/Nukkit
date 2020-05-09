@@ -39,8 +39,44 @@ public class Slime extends BaseLevelProvider {
 
     private int lastPosition = 0;
 
-    public Slime(final Level level, final String path) throws IOException {
-        super(level, path);
+    private SlimeWorld slimeWorld = null;
+    private static FileLoader loader;
+
+    private String name = "unknown";
+
+    public Slime(final Level level, final String path) throws Exception {
+        super(level, new File(path).getAbsoluteFile().getName(), true);
+        loader = new FileLoader(new File("fastworld/"));
+
+        final CompoundTag levelData = new CompoundTag("Data")
+                .putCompound("GameRules", new CompoundTag())
+
+                .putLong("DayTime", 0)
+                .putInt("GameType", 0)
+                .putString("generatorName", "DEFAULT")
+                .putString("generatorOptions", "")
+                .putInt("generatorVersion", 1)
+                .putBoolean("hardcore", false)
+                .putBoolean("initialized", true)
+                .putLong("LastPlayed", System.currentTimeMillis() / 1000)
+                .putString("LevelName", name)
+                .putBoolean("raining", false)
+                .putInt("rainTime", 0)
+                .putLong("RandomSeed", 32456357466L)
+                .putInt("SpawnX", 128)
+                .putInt("SpawnY", 70)
+                .putInt("SpawnZ", 128)
+                .putBoolean("thundering", false)
+                .putInt("thunderTime", 0)
+                .putInt("version", Slime.VERSION)
+                .putLong("Time", 0)
+                .putLong("SizeOnDisk", 0);
+
+        this.levelData = levelData;
+
+
+        this.name = new File(path).getAbsoluteFile().getName();
+        slimeWorld = SlimeWorld.deserializeWorld(new File(path).getAbsoluteFile().getName(), loader.loadWorld(new File(path).getAbsoluteFile().getName(), false));
     }
 
     public static String getProviderName() {
@@ -51,21 +87,36 @@ public class Slime extends BaseLevelProvider {
         return LevelProvider.ORDER_YZX;
     }
 
+    @Override
+    public void updateLevelName(String name) {
+        super.updateLevelName(name);
+    }
+
+
+    @Override
+    public String getGenerator() {
+        return "DEFAULT";
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
+
     public static boolean usesChunkSection() {
         return true;
     }
 
     public static boolean isValid(final String path) {
-        boolean isValid = new File(path + "/level.dat").exists() && new File(path + "/region/").isDirectory();
-        if (isValid) {
-            for (final File file : new File(path + "/region/").listFiles((dir, name) -> Pattern.matches("^.+\\.mc[r|a]$", name))) {
-                if (!file.getName().endsWith(".mca")) {
-                    isValid = false;
-                    break;
-                }
-            }
+        if (loader == null) {
+            new FileLoader(new File("fastworld/"));
         }
-        return isValid;
+
+        System.out.println("isValid()");
+        System.out.println(path);
+        System.out.println(new File(path).getAbsoluteFile().getName());
+        return loader.worldExists(new File(path).getAbsoluteFile().getName());
     }
 
     public static void generate(final String path, final String name, final long seed, final Class<? extends Generator> generator) throws IOException {
@@ -73,8 +124,8 @@ public class Slime extends BaseLevelProvider {
     }
 
     public static void generate(final String path, final String name, final long seed, final Class<? extends Generator> generator, final Map<String, String> options) throws IOException {
-        if (!new File(path + "/region").exists()) {
-            new File(path + "/region").mkdirs();
+        if (loader == null) {
+            loader = new FileLoader(new File("fastworld/"));
         }
 
         final CompoundTag levelData = new CompoundTag("Data")
@@ -101,7 +152,10 @@ public class Slime extends BaseLevelProvider {
             .putLong("Time", 0)
             .putLong("SizeOnDisk", 0);
 
-        NBTIO.writeGZIPCompressed(new CompoundTag().putCompound("Data", levelData), new FileOutputStream(path + "level.dat"), ByteOrder.BIG_ENDIAN);
+        if (!isValid(path)) {
+            loader.saveWorld(name, new byte[0], false);
+        }
+
     }
 
     public static ChunkSection createChunkSection(final int y) {
@@ -185,12 +239,24 @@ public class Slime extends BaseLevelProvider {
         return Chunk.getEmptyChunk(chunkX, chunkZ, this);
     }
 
+
+    @Override
+    public void saveChunks() {
+        super.saveChunks();
+
+        try {
+            loader.saveWorld(this.name, slimeWorld.serialize(), false);
+        } catch (IOException e) {
+            System.out.println(e + "    save error motherfucker");
+        }
+    }
+
     @Override
     public synchronized void saveChunk(final int X, final int Z) {
         final BaseFullChunk chunk = this.getChunk(X, Z);
         if (chunk != null) {
             try {
-                this.loadRegion(X >> 5, Z >> 5).writeChunk(chunk);
+                slimeWorld.updateChunk((Chunk) chunk);
             } catch (final Exception e) {
                 throw new ChunkException("Error saving chunk (" + X + ", " + Z + ")", e);
             }
@@ -202,13 +268,10 @@ public class Slime extends BaseLevelProvider {
         if (!(chunk instanceof Chunk)) {
             throw new ChunkException("Invalid Chunk class");
         }
-        final int regionX = x >> 5;
-        final int regionZ = z >> 5;
-        this.loadRegion(regionX, regionZ);
         chunk.setX(x);
         chunk.setZ(z);
         try {
-            this.getRegion(regionX, regionZ).writeChunk(chunk);
+            slimeWorld.updateChunk((Chunk) chunk);
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
@@ -240,7 +303,7 @@ public class Slime extends BaseLevelProvider {
                 }
                 if (chunk.isGenerated() && chunk.isPopulated() && chunk instanceof Chunk) {
                     final Chunk anvilChunk = (Chunk) chunk;
-                    chunk.compress();
+                    anvilChunk.compress();
                     if (System.currentTimeMillis() - start >= time) {
                         break;
                     }
@@ -252,14 +315,12 @@ public class Slime extends BaseLevelProvider {
 
     @Override
     public synchronized BaseFullChunk loadChunk(final long index, final int chunkX, final int chunkZ, final boolean create) {
-        final int regionX = BaseLevelProvider.getRegionIndexX(chunkX);
-        final int regionZ = BaseLevelProvider.getRegionIndexZ(chunkZ);
-        final BaseRegionLoader region = this.loadRegion(regionX, regionZ);
         this.level.timings.syncChunkLoadDataTimer.startTiming();
         BaseFullChunk chunk;
         try {
-            chunk = region.readChunk(chunkX - regionX * 32, chunkZ - regionZ * 32);
-        } catch (final IOException e) {
+           // chunk = region.readChunk(chunkX - regionX * 32, chunkZ - regionZ * 32);
+            chunk = slimeWorld.getChunk(chunkX, chunkZ);
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
         if (chunk == null) {
@@ -274,25 +335,5 @@ public class Slime extends BaseLevelProvider {
         return chunk;
     }
 
-    protected synchronized BaseRegionLoader loadRegion(final int x, final int z) {
-        final BaseRegionLoader tmp = this.lastRegion.get();
-        if (tmp != null && x == tmp.getX() && z == tmp.getZ()) {
-            return tmp;
-        }
-        final long index = Level.chunkHash(x, z);
-        synchronized (this.regions) {
-            BaseRegionLoader region = this.regions.get(index);
-            if (region == null) {
-                try {
-                    region = new RegionLoader(this, x, z);
-                } catch (final IOException e) {
-                    throw new RuntimeException(e);
-                }
-                this.regions.put(index, region);
-            }
-            this.lastRegion.set(region);
-            return region;
-        }
-    }
 
 }

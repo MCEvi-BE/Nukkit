@@ -1,4 +1,4 @@
-package cn.nukkit.level.format.anvil;
+package cn.nukkit.level.format.river;
 
 import cn.nukkit.block.Block;
 import cn.nukkit.level.format.anvil.util.BlockStorage;
@@ -10,7 +10,6 @@ import cn.nukkit.utils.*;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.function.IntConsumer;
 
 /**
  * author: MagicDroidX
@@ -30,15 +29,18 @@ public class ChunkSection implements cn.nukkit.level.format.ChunkSection {
     protected boolean hasBlockLight;
     protected boolean hasSkyLight;
 
-    private ChunkSection(int y, BlockStorage storage, byte[] blockLight, byte[] skyLight, byte[] compressedLight,
-                         boolean hasBlockLight, boolean hasSkyLight) {
+    public ChunkSection(int y, BlockStorage storage, byte[] blockLight, byte[] skyLight, byte[] compressedLight,
+                        boolean hasBlockLight, boolean hasSkyLight) {
         this.y = y;
         this.storage = storage;
+        this.blockLight = blockLight;
         this.skyLight = skyLight;
         this.compressedLight = compressedLight;
         this.hasBlockLight = hasBlockLight;
         this.hasSkyLight = hasSkyLight;
     }
+
+
 
     public ChunkSection(int y) {
         this.y = y;
@@ -381,5 +383,9 @@ public class ChunkSection implements cn.nukkit.level.format.ChunkSection {
                 this.hasBlockLight,
                 this.hasSkyLight
         );
+    }
+
+    public BlockStorage getStorage() {
+        return storage;
     }
 }

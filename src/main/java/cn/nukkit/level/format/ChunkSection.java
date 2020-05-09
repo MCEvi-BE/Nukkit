@@ -46,6 +46,11 @@ public interface ChunkSection {
 
     boolean isEmpty();
 
+
+    boolean hasBlockLight();
+
+    boolean hasSkyLight();
+
     void writeTo(BinaryStream stream);
 
     ChunkSection copy();

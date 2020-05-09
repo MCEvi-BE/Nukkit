@@ -476,7 +476,7 @@ public class Chunk extends BaseChunk {
 
         try {
             //deflate -> compress
-            return Zstd.compress(NBTIO.write(chunk, ByteOrder.BIG_ENDIAN), RegionLoader.COMPRESSION_LEVEL);
+            return new byte[0];
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

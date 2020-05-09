@@ -2014,6 +2014,9 @@ public class Server {
     }
 
     public boolean isLevelGenerated(String name) {
+
+
+
         if (Objects.equals(name.trim(), "")) {
             return false;
         }
