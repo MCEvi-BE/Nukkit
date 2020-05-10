@@ -1,16 +1,27 @@
 package cn.nukkit.level.format.river;
 
+import cn.nukkit.blockentity.BlockEntity;
+import cn.nukkit.blockentity.BlockEntitySpawnable;
 import cn.nukkit.level.GameRules;
 import cn.nukkit.level.Level;
+import cn.nukkit.level.format.ChunkSection;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.format.LevelProvider;
+import cn.nukkit.level.format.anvil.Chunk;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.level.format.generic.BaseLevelProvider;
 import cn.nukkit.level.generator.Generator;
+import cn.nukkit.nbt.NBTIO;
+import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.scheduler.AsyncTask;
+import cn.nukkit.utils.BinaryStream;
 import cn.nukkit.utils.ChunkException;
+import cn.nukkit.utils.ThreadCache;
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class River extends BaseLevelProvider {
@@ -60,7 +71,68 @@ public class River extends BaseLevelProvider {
     }
 
     @Override
-    public AsyncTask requestChunkTask(final int X, final int Z) {
+    public AsyncTask requestChunkTask(final int x, final int z) {
+        final Chunk chunk = (Chunk) this.getChunk(x, z, false);
+        if (chunk == null) {
+            throw new ChunkException("Invalid Chunk Set");
+        }
+
+        final long timestamp = chunk.getChanges();
+
+        byte[] blockEntities = new byte[0];
+
+        if (!chunk.getBlockEntities().isEmpty()) {
+            final List<CompoundTag> tagList = new ArrayList<>();
+
+            for (final BlockEntity blockEntity : chunk.getBlockEntities().values()) {
+                if (blockEntity instanceof BlockEntitySpawnable) {
+                    tagList.add(((BlockEntitySpawnable) blockEntity).getSpawnCompound());
+                }
+            }
+
+            try {
+                blockEntities = NBTIO.write(tagList, ByteOrder.LITTLE_ENDIAN, true);
+            } catch (final IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        final Map<Integer, Integer> extra = chunk.getBlockExtraDataArray();
+        final BinaryStream extraData;
+        if (!extra.isEmpty()) {
+            extraData = new BinaryStream();
+            extraData.putVarInt(extra.size());
+            for (final Map.Entry<Integer, Integer> entry : extra.entrySet()) {
+                extraData.putVarInt(entry.getKey());
+                extraData.putLShort(entry.getValue());
+            }
+        } else {
+            extraData = null;
+        }
+
+        final BinaryStream stream = ThreadCache.binaryStream.get().reset();
+        int count = 0;
+        final ChunkSection[] sections = chunk.getSections();
+        for (int i = sections.length - 1; i >= 0; i--) {
+            if (!sections[i].isEmpty()) {
+                count = i + 1;
+                break;
+            }
+        }
+        for (int i = 0; i < count; i++) {
+            sections[i].writeTo(stream);
+        }
+        stream.put(chunk.getBiomeIdArray());
+        stream.putByte((byte) 0);
+        if (extraData != null) {
+            stream.put(extraData.getBuffer());
+        } else {
+            stream.putVarInt(0);
+        }
+        stream.put(blockEntities);
+
+        this.getLevel().chunkRequestCallback(timestamp, x, z, count, stream.getBuffer());
+
         return null;
     }
 
