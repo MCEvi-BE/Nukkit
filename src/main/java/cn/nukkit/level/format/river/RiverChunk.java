@@ -1,25 +1,19 @@
 package cn.nukkit.level.format.river;
 
 import cn.nukkit.block.Block;
+import cn.nukkit.level.format.ChunkSection;
 import cn.nukkit.level.format.generic.BaseChunk;
 import cn.nukkit.level.format.generic.EmptyChunkSection;
-
 import java.util.ArrayList;
 import java.util.Arrays;
-
 
 /**
  * author: MagicDroidX
  * Nukkit Project
  */
-public class Chunk extends BaseChunk {
+public class RiverChunk extends BaseChunk {
 
-    @Override
-    public Chunk clone() {
-        return (Chunk) super.clone();
-    }
-
-    public Chunk(int x, int z) {
+    public RiverChunk(final int x, final int z) {
 
         this.x = x;
         this.z = z;
@@ -29,13 +23,12 @@ public class Chunk extends BaseChunk {
 
         Arrays.fill(this.heightMap, (byte) 255);
 
-        this.sections = new cn.nukkit.level.format.ChunkSection[16];
+        this.sections = new ChunkSection[16];
         System.arraycopy(EmptyChunkSection.EMPTY, 0, this.sections, 0, 16);
-
 
     }
 
-    public Chunk(int x, int z, cn.nukkit.level.format.ChunkSection[] sections,byte[] heightMap, byte[] biomes) {
+    public RiverChunk(final int x, final int z, final ChunkSection[] sections, final byte[] heightMap, final byte[] biomes) {
 
         this.x = x;
         this.z = z;
@@ -51,6 +44,52 @@ public class Chunk extends BaseChunk {
     }
 
     @Override
+    public RiverChunk clone() {
+        return (RiverChunk) super.clone();
+    }
+
+    @Override
+    public int getBlockSkyLight(final int x, final int y, final int z) {
+        final ChunkSection section = this.sections[y >> 4];
+        if (section instanceof RiverChunkSection) {
+            final RiverChunkSection anvilSection = (RiverChunkSection) section;
+            if (anvilSection.skyLight != null) {
+                return section.getBlockSkyLight(x, y & 0x0f, z);
+            } else if (!anvilSection.hasSkyLight) {
+                return 0;
+            } else {
+                final int height = this.getHighestBlockAt(x, z);
+                if (height < y) {
+                    return 15;
+                } else if (height == y) {
+                    return Block.transparent[this.getBlockId(x, y, z)] ? 15 : 0;
+                } else {
+                    return section.getBlockSkyLight(x, y & 0x0f, z);
+                }
+            }
+        } else {
+            return section.getBlockSkyLight(x, y & 0x0f, z);
+        }
+    }
+
+    @Override
+    public int getBlockLight(final int x, final int y, final int z) {
+        final ChunkSection section = this.sections[y >> 4];
+        if (section instanceof RiverChunkSection) {
+            final RiverChunkSection anvilSection = (RiverChunkSection) section;
+            if (anvilSection.blockLight != null) {
+                return section.getBlockLight(x, y & 0x0f, z);
+            } else if (!anvilSection.hasBlockLight) {
+                return 0;
+            } else {
+                return section.getBlockLight(x, y & 0x0f, z);
+            }
+        } else {
+            return section.getBlockLight(x, y & 0x0f, z);
+        }
+    }
+
+    @Override
     public boolean isPopulated() {
         return true;
     }
@@ -61,7 +100,7 @@ public class Chunk extends BaseChunk {
     }
 
     @Override
-    public void setPopulated(boolean value) {
+    public void setPopulated(final boolean value) {
 
     }
 
@@ -76,8 +115,13 @@ public class Chunk extends BaseChunk {
     }
 
     @Override
-    public void setGenerated(boolean value) {
+    public void setGenerated(final boolean value) {
 
+    }
+
+    @Override
+    public byte[] toBinary() {
+        return new byte[0];
     }
 
     @Override
@@ -86,59 +130,12 @@ public class Chunk extends BaseChunk {
     }
 
     @Override
-    public byte[] toBinary() {
-      return new byte[0];
-    }
-
-    @Override
-    public int getBlockSkyLight(int x, int y, int z) {
-        cn.nukkit.level.format.ChunkSection section = this.sections[y >> 4];
-        if (section instanceof RiverChunkSection) {
-            RiverChunkSection anvilSection = (RiverChunkSection) section;
-            if (anvilSection.skyLight != null) {
-                return section.getBlockSkyLight(x, y & 0x0f, z);
-            } else if (!anvilSection.hasSkyLight) {
-                return 0;
-            } else {
-                int height = getHighestBlockAt(x, z);
-                if (height < y) {
-                    return 15;
-                } else if (height == y) {
-                    return Block.transparent[getBlockId(x, y, z)] ? 15 : 0;
-                } else {
-                    return section.getBlockSkyLight(x, y & 0x0f, z);
-                }
-            }
-        } else {
-            return section.getBlockSkyLight(x, y & 0x0f, z);
-        }
-    }
-
-    @Override
-    public int getBlockLight(int x, int y, int z) {
-        cn.nukkit.level.format.ChunkSection section = this.sections[y >> 4];
-        if (section instanceof RiverChunkSection) {
-            RiverChunkSection anvilSection = (RiverChunkSection) section;
-            if (anvilSection.blockLight != null) {
-                return section.getBlockLight(x, y & 0x0f, z);
-            } else if (!anvilSection.hasBlockLight) {
-                return 0;
-            } else {
-                return section.getBlockLight(x, y & 0x0f, z);
-            }
-        } else {
-            return section.getBlockLight(x, y & 0x0f, z);
-        }
-    }
-
-
-    @Override
     public boolean compress() {
         super.compress();
         boolean result = false;
-        for (cn.nukkit.level.format.ChunkSection section : getSections()) {
+        for (final ChunkSection section : this.getSections()) {
             if (section instanceof RiverChunkSection) {
-                RiverChunkSection anvilSection = (RiverChunkSection) section;
+                final RiverChunkSection anvilSection = (RiverChunkSection) section;
                 if (!anvilSection.isEmpty()) {
                     result |= anvilSection.compress();
                 }
@@ -146,17 +143,5 @@ public class Chunk extends BaseChunk {
         }
         return result;
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
 }

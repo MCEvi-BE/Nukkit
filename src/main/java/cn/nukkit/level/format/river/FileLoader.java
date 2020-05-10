@@ -1,8 +1,5 @@
-package cn.nukkit.swm;
+package cn.nukkit.level.format.river;
 
-import cn.nukkit.swm.api.exceptions.UnknownWorldException;
-import cn.nukkit.swm.api.exceptions.WorldInUseException;
-import cn.nukkit.swm.api.loaders.SlimeLoader;
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
@@ -14,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class FileLoader implements SlimeLoader {
+public final class FileLoader {
 
     private static final FilenameFilter WORLD_FILE_FILTER = (dir, name) -> name.endsWith(".slime");
 
@@ -33,7 +30,6 @@ public class FileLoader implements SlimeLoader {
         worldDir.mkdirs();
     }
 
-    @Override
     public byte[] loadWorld(final String worldName, final boolean readOnly) throws UnknownWorldException, IOException, WorldInUseException {
         if (!this.worldExists(worldName)) {
             throw new UnknownWorldException(worldName);
@@ -72,12 +68,10 @@ public class FileLoader implements SlimeLoader {
         return serializedWorld;
     }
 
-    @Override
     public boolean worldExists(final String worldName) {
         return new File(this.worldDir, worldName + ".slime").exists();
     }
 
-    @Override
     public List<String> listWorlds() throws NotDirectoryException {
         final String[] worlds = this.worldDir.list(FileLoader.WORLD_FILE_FILTER);
 
@@ -88,7 +82,6 @@ public class FileLoader implements SlimeLoader {
         return Arrays.stream(worlds).map(c -> c.substring(0, c.length() - 6)).collect(Collectors.toList());
     }
 
-    @Override
     public void saveWorld(final String worldName, final byte[] serializedWorld, final boolean lock) throws IOException {
         RandomAccessFile worldFile = this.worldFiles.get(worldName);
         final boolean tempFile = worldFile == null;
@@ -116,7 +109,6 @@ public class FileLoader implements SlimeLoader {
         }
     }
 
-    @Override
     public void unlockWorld(final String worldName) throws UnknownWorldException, IOException {
         if (!this.worldExists(worldName)) {
             throw new UnknownWorldException(worldName);
@@ -129,7 +121,6 @@ public class FileLoader implements SlimeLoader {
         }
     }
 
-    @Override
     public boolean isWorldLocked(final String worldName) throws IOException {
         RandomAccessFile file = this.worldFiles.get(worldName);
         boolean closeOnFinish = false;
@@ -159,7 +150,6 @@ public class FileLoader implements SlimeLoader {
         return false;
     }
 
-    @Override
     public void deleteWorld(final String worldName) throws UnknownWorldException {
         if (!this.worldExists(worldName)) {
             throw new UnknownWorldException(worldName);

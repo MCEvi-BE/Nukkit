@@ -50,7 +50,20 @@ public abstract class BaseLevelProvider implements LevelProvider {
         this.level = level;
         this.path = path;
         this.spawn = new Vector3(256.0d, 90.0d, 256.0d);
-        final File slimeFile = new File(this.getPath(), "");
+        final File worldDir = new File(this.getPath());
+        final File[] files = worldDir.listFiles();
+        if (files == null) {
+            throw new RuntimeException("Files not found in " + worldDir);
+        }
+        for (final File file : files) {
+            final String name = file.getName();
+            if (name.endsWith(".slime")) {
+                // Slime dosyası
+
+            } else {
+                // Diğer dosyalar.
+            }
+        }
     }
 
     public BaseLevelProvider(final Level level, final String path) throws IOException {
