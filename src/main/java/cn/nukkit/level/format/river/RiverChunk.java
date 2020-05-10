@@ -2,7 +2,6 @@ package cn.nukkit.level.format.river;
 
 import cn.nukkit.block.Block;
 import cn.nukkit.level.format.ChunkSection;
-import cn.nukkit.level.format.LevelProvider;
 import cn.nukkit.level.format.generic.BaseChunk;
 import cn.nukkit.level.format.generic.EmptyChunkSection;
 import java.util.ArrayList;
@@ -15,33 +14,23 @@ import java.util.Arrays;
 public class RiverChunk extends BaseChunk {
 
     public RiverChunk(final int x, final int z) {
-
         this.x = x;
         this.z = z;
-
         this.heightMap = new byte[256];
         this.biomes = new byte[256];
-
         Arrays.fill(this.heightMap, (byte) 255);
-
         this.sections = new ChunkSection[16];
         System.arraycopy(EmptyChunkSection.EMPTY, 0, this.sections, 0, 16);
-
     }
 
     public RiverChunk(final int x, final int z, final ChunkSection[] sections, final byte[] heightMap, final byte[] biomes) {
-
         this.x = x;
         this.z = z;
-
         this.heightMap = heightMap;
         this.biomes = biomes;
-
         this.sections = sections;
-
         this.NBTentities = new ArrayList<>();
         this.NBTtiles = new ArrayList<>();
-
     }
 
     @Override

@@ -91,12 +91,6 @@ public class River extends BaseLevelProvider {
         final RiverChunk tmp;
         if (chunk == null) {
             tmp = new RiverChunk(chunkX, chunkZ);
-            try {
-                tmp.load(true);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            tmp.
         } else {
             tmp = chunk;
         }
