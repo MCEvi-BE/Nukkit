@@ -46,20 +46,26 @@ public abstract class BaseLevelProvider implements LevelProvider {
 
     private Vector3 spawn;
 
-    public BaseLevelProvider(final Level level, final String path, final boolean f) {
+    public BaseLevelProvider(final Level level, final String path, final boolean f) throws IOException {
         this.level = level;
         this.path = path;
-        this.spawn = new Vector3(0.0d, 64.0d, 0.0d);
         final File worldDir = new File(this.getPath());
         final File[] files = worldDir.listFiles();
         if (files == null) {
             throw new RuntimeException("Files not found in " + worldDir);
         }
+        boolean init = false;
         for (final File file : files) {
             final String name = file.getName();
-            if (name.endsWith(".slime")) {
+            if (name.endsWith(".slime") && !init) {
                 // Slime dosyası
-
+                init = true;
+                final CompoundTag data = NBTIO.readZSTDCompressed(new FileInputStream(file), ByteOrder.BIG_ENDIAN);
+                this.levelData = data;
+                this.spawn = new Vector3(
+                    this.levelData.getDouble("SpawnX"),
+                    this.levelData.getDouble("SpawnY"),
+                    this.levelData.getDouble("SpawnZ"));
             } else {
                 // Diğer dosyalar.
             }

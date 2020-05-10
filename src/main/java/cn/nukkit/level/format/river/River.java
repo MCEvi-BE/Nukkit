@@ -3,7 +3,6 @@ package cn.nukkit.level.format.river;
 import cn.nukkit.level.GameRules;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.format.LevelProvider;
-import cn.nukkit.level.format.anvil.Anvil;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.level.format.generic.BaseLevelProvider;
 import cn.nukkit.level.generator.Generator;
@@ -18,7 +17,7 @@ import java.util.Map;
 
 public class River extends BaseLevelProvider {
 
-    public River(final RiverLevel level, final String path, final boolean f) {
+    public River(final RiverLevel level, final String path, final boolean f) throws IOException {
         super(level, path, f);
     }
 
@@ -59,17 +58,22 @@ public class River extends BaseLevelProvider {
         slimeFile.createNewFile();
         final CompoundTag data = new CompoundTag("Data")
             .putString("LevelName", name)
-            .putInt("SpawnX", 0)
-            .putInt("SpawnY", 64)
-            .putInt("SpawnZ", 0)
-            .putLong("Time", 0)
-            .putLong("SizeOnDisk", 0);
+            .putDouble("SpawnX", 0.0d)
+            .putDouble("SpawnY", 64.0d)
+            .putDouble("SpawnZ", 0.0d)
+            .putLong("Time", 0L)
+            .putLong("SizeOnDisk", 0L);
         NBTIO.writeZSTDCompressed(data, new FileOutputStream(slimeFile), ByteOrder.BIG_ENDIAN);
     }
 
     @Override
     public BaseFullChunk loadChunk(final long index, final int chunkX, final int chunkZ, final boolean create) {
         return null;
+    }
+
+    @Override
+    public GameRules getGamerules() {
+        return GameRules.getDefault();
     }
 
     @Override
@@ -90,11 +94,6 @@ public class River extends BaseLevelProvider {
     @Override
     public void saveChunk(final int X, final int Z, final FullChunk chunk) {
 
-    }
-
-    @Override
-    public GameRules getGamerules() {
-        return GameRules.getDefault();
     }
 
 }
