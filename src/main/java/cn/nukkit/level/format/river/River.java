@@ -60,14 +60,6 @@ public class River extends BaseLevelProvider {
         }
         final File slimeFile = new File(worldDir, name + ".slime");
         slimeFile.createNewFile();
-        final CompoundTag data = new CompoundTag("Data")
-            .putString("LevelName", name)
-            .putDouble("SpawnX", 0.0d)
-            .putDouble("SpawnY", 64.0d)
-            .putDouble("SpawnZ", 0.0d)
-            .putLong("Time", 0L)
-            .putLong("SizeOnDisk", 0L);
-        NBTIO.writeZSTDCompressed(data, new FileOutputStream(slimeFile), ByteOrder.BIG_ENDIAN);
     }
 
     @Override

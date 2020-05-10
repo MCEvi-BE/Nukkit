@@ -1682,8 +1682,17 @@ public class Server {
 
             if (provider.equals(River.class)) {
                 final FileLoader loader = new FileLoader(new File(path));
+                final List<CompoundTag> maps = new ArrayList<>();
+                final CompoundTag data = new CompoundTag("Data")
+                    .putString("LevelName", name)
+                    .putDouble("SpawnX", 0.0d)
+                    .putDouble("SpawnY", 64.0d)
+                    .putDouble("SpawnZ", 0.0d)
+                    .putLong("Time", 0L)
+                    .putLong("SizeOnDisk", 0L);
+                maps.add(data);
                 final RiverLevel riverLevel = new RiverLevel(this, name, path, new HashMap<>(),
-                    new CompoundTag(""), new ArrayList<>());
+                    new CompoundTag(""), maps);
                 level = riverLevel;
                 final byte[] serialized = riverLevel.serialize();
                 loader.saveWorld(name, serialized, false);
