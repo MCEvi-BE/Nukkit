@@ -50,7 +50,7 @@ public abstract class BaseLevelProvider implements LevelProvider {
         this.level = level;
         this.path = path;
         this.spawn = new Vector3(256.0d, 90.0d, 256.0d);
-
+        final File slimeFile = new File(this.getPath(), "");
     }
 
     public BaseLevelProvider(final Level level, final String path) throws IOException {
@@ -60,6 +60,9 @@ public abstract class BaseLevelProvider implements LevelProvider {
         if (!file_path.exists()) {
             file_path.mkdirs();
         }
+        // getPath()
+        // ..../dünyaynın-ismi/
+        // getPath() + level.dat
         final CompoundTag levelData = NBTIO.readCompressed(new FileInputStream(new File(this.getPath() + "level.dat")), ByteOrder.BIG_ENDIAN);
         if (levelData.get("Data") instanceof CompoundTag) {
             this.levelData = levelData.getCompound("Data");
