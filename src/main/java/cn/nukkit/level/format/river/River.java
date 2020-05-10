@@ -14,6 +14,9 @@ public class River extends BaseLevelProvider {
         super(level, path, f);
     }
 
+    public String getProviderName() {
+        return "river";
+    }
     @Override
     public BaseFullChunk loadChunk(long index, int chunkX, int chunkZ, boolean create) {
         return null;
