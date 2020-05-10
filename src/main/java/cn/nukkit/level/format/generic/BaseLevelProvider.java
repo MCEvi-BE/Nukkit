@@ -6,7 +6,6 @@ import cn.nukkit.level.Level;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.format.LevelProvider;
 import cn.nukkit.level.format.river.FileLoader;
-import cn.nukkit.level.format.river.RiverLevel;
 import cn.nukkit.level.format.river.UnknownWorldException;
 import cn.nukkit.level.format.river.WorldInUseException;
 import cn.nukkit.level.generator.Generator;
@@ -15,6 +14,7 @@ import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.ChunkException;
 import cn.nukkit.utils.LevelException;
+import com.github.luben.zstd.Zstd;
 import com.google.common.collect.ImmutableMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -67,13 +67,15 @@ public abstract class BaseLevelProvider implements LevelProvider {
                 init = true;
                 final FileLoader loader = new FileLoader(worldDir);
                 final byte[] serialized = loader.loadWorld(name, true);
-                final RiverLevel riverLevel = RiverLevel.deserialize(server, name, path, serialized);
-                final CompoundTag data = riverLevel.getLevelData();
+                final byte[] deserialized = new byte[serialized.length];
+                Zstd.decompress(deserialized, serialized);
+                final CompoundTag data = NBTIO.read(serialized);
                 this.levelData = data;
                 this.spawn = new Vector3(
                     this.levelData.getDouble("SpawnX"),
                     this.levelData.getDouble("SpawnY"),
                     this.levelData.getDouble("SpawnZ"));
+                System.out.println(this.spawn);
             } else {
                 // Diğer dosyalar.
             }
