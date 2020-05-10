@@ -1618,7 +1618,9 @@ public class Server {
                 if (!fileLoader.worldExists(name)) {
                     return false;
                 }
-                level = RiverLevel.deserialize(this, name, path, fileLoader.loadWorld(name, true));
+                final RiverLevel riverLevel = RiverLevel.deserialize(this, name, path, fileLoader.loadWorld(name, true));
+                level = riverLevel;
+                level.prepareLevel(River.class);
             } else {
                 level = new Level(this, name, path, provider);
             }
@@ -1686,9 +1688,9 @@ public class Server {
                 final List<CompoundTag> maps = new ArrayList<>();
                 final CompoundTag data = new CompoundTag("maps")
                     .putString("LevelName", name)
-                    .putDouble("SpawnX", 0.0d)
-                    .putDouble("SpawnY", 64.0d)
-                    .putDouble("SpawnZ", 0.0d)
+                    .putInt("SpawnX", 0)
+                    .putInt("SpawnY", 64)
+                    .putInt("SpawnZ", 0)
                     .putLong("Time", 0L)
                     .putLong("SizeOnDisk", 0L);
                 final Vector3 spawn = new Vector3(0.0d, 64.0d, 0.0d);

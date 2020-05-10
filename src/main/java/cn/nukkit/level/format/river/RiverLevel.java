@@ -6,6 +6,7 @@ import cn.nukkit.level.Level;
 import cn.nukkit.level.format.ChunkSection;
 import cn.nukkit.level.format.anvil.util.BlockStorage;
 import cn.nukkit.level.format.anvil.util.NibbleArray;
+import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.DoubleTag;
@@ -37,7 +38,6 @@ public final class RiverLevel extends Level {
         this.chunks = chunks;
         this.extraData = extraData;
         this.worldMaps = worldMaps;
-
     }
 
     public static RiverLevel deserialize(final Server server, final String name, final String path, final byte[] data)
@@ -175,13 +175,17 @@ public final class RiverLevel extends Level {
 
         // World Maps
         final CompoundTag mapsCompound = NBTIO.read(mapsTag, ByteOrder.BIG_ENDIAN);
-        List<CompoundTag> mapList = new ArrayList<>();
+        final List<CompoundTag> mapList = mapsCompound.getList("maps", CompoundTag.class).getAll();
 
-        if (mapsCompound != null) {
-            mapList = mapsCompound.getList("maps", CompoundTag.class).getAll();
-        }
-
-        return new RiverLevel(server, name, path, chunks, extraCompound, mapList);
+        final RiverLevel riverLevel = new RiverLevel(server, name, path, chunks, extraCompound, mapList);
+        final River river = (River) riverLevel.getProvider();
+        river.setLevelData(mapsCompound);
+        river.setSpawn(new Vector3(
+            mapsCompound.getInt("SpawnX"),
+            mapsCompound.getInt("SpawnY"),
+            mapsCompound.getInt("SpawnZ")
+        ));
+        return riverLevel;
     }
 
     private static Map<Long, RiverChunk> readChunks(final int minX, final int minZ, final int width, final int depth,

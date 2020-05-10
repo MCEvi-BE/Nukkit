@@ -85,7 +85,7 @@ public class River extends BaseLevelProvider {
 
     @Override
     public String getGenerator() {
-        return "river";
+        return "void";
     }
 
     @Override
