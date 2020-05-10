@@ -163,6 +163,7 @@ public class River extends BaseLevelProvider {
         final RiverChunk tmp;
         if (chunk == null) {
             tmp = new RiverChunk(chunkX, chunkZ);
+            tmp.setProvider(this.getLevel().getProvider());
         } else {
             tmp = chunk;
         }
