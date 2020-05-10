@@ -3351,7 +3351,7 @@ public class Level implements ChunkManager, Metadatable {
         return false;
     }
 
-    private void prepareLevel(final Class<? extends LevelProvider> provider) {
+    public void prepareLevel(final Class<? extends LevelProvider> provider) {
         this.provider.updateLevelName(this.folderName);
 
         this.server.getLogger().info(this.server.getLanguage().translateString("nukkit.level.preparing",
