@@ -2,6 +2,7 @@ package cn.nukkit.level.format.river;
 
 import cn.nukkit.level.Level;
 import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.level.format.LevelProvider;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.level.format.generic.BaseLevelProvider;
 import cn.nukkit.level.generator.Generator;
@@ -20,6 +21,14 @@ public class River extends BaseLevelProvider {
     }
 
     public static boolean isValid(final String path) {
+        return true;
+    }
+
+    public static byte getProviderOrder() {
+        return LevelProvider.ORDER_YZX;
+    }
+
+    public static boolean usesChunkSection() {
         return true;
     }
 

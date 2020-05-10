@@ -1607,6 +1607,7 @@ public class Server {
 
         final Class<? extends LevelProvider> provider = LevelProviderManager.getProvider(path);
 
+        System.out.println(provider);
         if (provider == null) {
             Server.log.error(this.getLanguage().translateString("nukkit.level.loadError", new String[]{name, "Unknown provider"}));
 
@@ -1615,7 +1616,9 @@ public class Server {
 
         final Level level;
         try {
+            System.out.println("testtest1");
             level = new Level(this, name, path, provider);
+            System.out.println("testtest2");
         } catch (final Exception e) {
             Server.log.error(this.getLanguage().translateString("nukkit.level.loadError", new String[]{name, e.getMessage()}));
             return false;
@@ -1623,7 +1626,9 @@ public class Server {
 
         this.levels.put(level.getId(), level);
 
+        System.out.println("testtest3");
         level.initLevel();
+        System.out.println("testtest4");
 
         this.getPluginManager().callEvent(new LevelLoadEvent(level));
 
