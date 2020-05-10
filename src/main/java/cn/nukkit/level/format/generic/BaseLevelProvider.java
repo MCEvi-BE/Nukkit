@@ -5,16 +5,12 @@ import cn.nukkit.level.GameRules;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.format.LevelProvider;
-import cn.nukkit.level.format.river.FileLoader;
-import cn.nukkit.level.format.river.UnknownWorldException;
-import cn.nukkit.level.format.river.WorldInUseException;
 import cn.nukkit.level.generator.Generator;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.ChunkException;
 import cn.nukkit.utils.LevelException;
-import com.github.luben.zstd.Zstd;
 import com.google.common.collect.ImmutableMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -50,35 +46,13 @@ public abstract class BaseLevelProvider implements LevelProvider {
 
     private Vector3 spawn;
 
-    public BaseLevelProvider(final Server server, final Level level, final String path)
-        throws IOException, UnknownWorldException, WorldInUseException {
+    public BaseLevelProvider(final Level level, final String path, final boolean f) {
         this.level = level;
         this.path = path;
         final File worldDir = new File(this.getPath());
         final File[] files = worldDir.listFiles();
         if (files == null) {
             throw new RuntimeException("Files not found in " + worldDir);
-        }
-        boolean init = false;
-        for (final File file : files) {
-            if (file.getName().endsWith(".slime") && !init) {
-                final String name = file.getName().replace(".slime", "");
-                // Slime dosyası
-                init = true;
-                final FileLoader loader = new FileLoader(worldDir);
-                final byte[] serialized = loader.loadWorld(name, true);
-                final byte[] deserialized = new byte[serialized.length];
-                Zstd.decompress(deserialized, serialized);
-                final CompoundTag data = NBTIO.read(deserialized);
-                this.levelData = data;
-                this.spawn = new Vector3(
-                    this.levelData.getDouble("SpawnX"),
-                    this.levelData.getDouble("SpawnY"),
-                    this.levelData.getDouble("SpawnZ"));
-                System.out.println(this.spawn);
-            } else {
-                // Diğer dosyalar.
-            }
         }
     }
 

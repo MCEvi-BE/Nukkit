@@ -117,6 +117,10 @@ public class NBTIO {
         return NBTIO.readCompressed(inputStream, ByteOrder.BIG_ENDIAN);
     }
 
+    public static CompoundTag readZSTDCompressed(final byte[] bytes, final ByteOrder endianness) throws IOException {
+        return NBTIO.readZSTDCompressed(new ByteArrayInputStream(bytes), endianness);
+    }
+
     public static CompoundTag readZSTDCompressed(final InputStream inputStream, final ByteOrder endianness) throws IOException {
         return NBTIO.read(new BufferedInputStream(new ZstdInputStream(inputStream)), endianness);
     }
