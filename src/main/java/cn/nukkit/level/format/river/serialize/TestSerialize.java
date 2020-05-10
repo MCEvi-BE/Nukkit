@@ -5,6 +5,7 @@ import cn.nukkit.level.format.ChunkSection;
 import cn.nukkit.level.format.anvil.util.BlockStorage;
 import cn.nukkit.level.format.anvil.util.NibbleArray;
 import cn.nukkit.level.format.river.Chunk;
+import cn.nukkit.level.format.river.RiverChunkSection;
 import cn.nukkit.level.format.river.RiverWorld;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
@@ -448,7 +449,7 @@ public class TestSerialize {
                     dataStream.read(skyLight);
                 }
 
-                chunkSectionArray[i] = new cn.nukkit.level.format.river.ChunkSection(i, new BlockStorage(blockArray, new NibbleArray(dataArray)), blockLight, skyLight, null, hasBlockLight, hasSkyLight);
+                chunkSectionArray[i] = new RiverChunkSection(i, new BlockStorage(blockArray, new NibbleArray(dataArray)), blockLight, skyLight, null, hasBlockLight, hasSkyLight);
 
             }
         }

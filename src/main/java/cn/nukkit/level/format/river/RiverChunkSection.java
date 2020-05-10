@@ -15,7 +15,7 @@ import java.util.Arrays;
  * author: MagicDroidX
  * Nukkit Project
  */
-public class ChunkSection implements cn.nukkit.level.format.ChunkSection {
+public class RiverChunkSection implements cn.nukkit.level.format.ChunkSection {
 
     private static final PalettedBlockStorage EMPTY_STORAGE = new PalettedBlockStorage();
 
@@ -29,8 +29,8 @@ public class ChunkSection implements cn.nukkit.level.format.ChunkSection {
     protected boolean hasBlockLight;
     protected boolean hasSkyLight;
 
-    public ChunkSection(int y, BlockStorage storage, byte[] blockLight, byte[] skyLight, byte[] compressedLight,
-                        boolean hasBlockLight, boolean hasSkyLight) {
+    public RiverChunkSection(int y, BlockStorage storage, byte[] blockLight, byte[] skyLight, byte[] compressedLight,
+                             boolean hasBlockLight, boolean hasSkyLight) {
         this.y = y;
         this.storage = storage;
         this.blockLight = blockLight;
@@ -42,7 +42,7 @@ public class ChunkSection implements cn.nukkit.level.format.ChunkSection {
 
 
 
-    public ChunkSection(int y) {
+    public RiverChunkSection(int y) {
         this.y = y;
 
         hasBlockLight = false;
@@ -51,7 +51,7 @@ public class ChunkSection implements cn.nukkit.level.format.ChunkSection {
         storage = new BlockStorage();
     }
 
-    public ChunkSection(CompoundTag nbt) {
+    public RiverChunkSection(CompoundTag nbt) {
         this.y = nbt.getByte("Y");
 
         byte[] blocks = nbt.getByteArray("Blocks");
@@ -373,8 +373,8 @@ public class ChunkSection implements cn.nukkit.level.format.ChunkSection {
         return hasSkyLight;
     }
 
-    public ChunkSection copy() {
-        return new ChunkSection(
+    public RiverChunkSection copy() {
+        return new RiverChunkSection(
                 this.y,
                 this.storage.copy(),
                 this.blockLight == null ? null : this.blockLight.clone(),

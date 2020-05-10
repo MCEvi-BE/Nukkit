@@ -25,7 +25,7 @@ public class River extends BaseLevelProvider {
     }
 
     public static byte getProviderOrder() {
-        return LevelProvider.ORDER_YZX;
+        return LevelProvider.ORDER_ZXY;
     }
 
     public static boolean usesChunkSection() {
