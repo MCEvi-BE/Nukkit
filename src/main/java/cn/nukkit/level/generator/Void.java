@@ -23,7 +23,7 @@ public final class Void extends Generator {
 
     @Override
     public void init(final ChunkManager level, final NukkitRandom random) {
-
+        this.level = level;
     }
 
     @Override
