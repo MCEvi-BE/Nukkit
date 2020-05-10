@@ -69,7 +69,7 @@ public abstract class BaseLevelProvider implements LevelProvider {
                 final byte[] serialized = loader.loadWorld(name, true);
                 final byte[] deserialized = new byte[serialized.length];
                 Zstd.decompress(deserialized, serialized);
-                final CompoundTag data = NBTIO.read(serialized);
+                final CompoundTag data = NBTIO.read(deserialized);
                 this.levelData = data;
                 this.spawn = new Vector3(
                     this.levelData.getDouble("SpawnX"),
