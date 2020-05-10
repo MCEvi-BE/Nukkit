@@ -17,6 +17,10 @@ public class River extends BaseLevelProvider {
         return "river";
     }
 
+    public static boolean isValid(final String path) {
+        return true;
+    }
+
     @Override
     public BaseFullChunk loadChunk(final long index, final int chunkX, final int chunkZ, final boolean create) {
         return null;
