@@ -4,8 +4,10 @@ import cn.nukkit.level.Level;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.level.format.generic.BaseLevelProvider;
+import cn.nukkit.level.generator.Generator;
 import cn.nukkit.scheduler.AsyncTask;
 import java.io.IOException;
+import java.util.Map;
 
 public class River extends BaseLevelProvider {
 
@@ -19,6 +21,11 @@ public class River extends BaseLevelProvider {
 
     public static boolean isValid(final String path) {
         return true;
+    }
+
+    public static void generate(final String path, final String name, final long seed,
+                                final Class<? extends Generator> generator, final Map<String, String> options) throws IOException {
+
     }
 
     @Override

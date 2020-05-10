@@ -50,7 +50,7 @@ public abstract class BaseLevelProvider implements LevelProvider {
         this.level = level;
         this.path = path;
         this.spawn = new Vector3(256.0d, 90.0d, 256.0d);
-        System.out.println(path);
+
     }
 
     public BaseLevelProvider(final Level level, final String path) throws IOException {
