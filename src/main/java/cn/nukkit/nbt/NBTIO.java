@@ -9,6 +9,7 @@ import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.Tag;
 import cn.nukkit.utils.ThreadCache;
 
+import com.github.luben.zstd.ZstdOutputStream;
 import java.io.*;
 import java.nio.ByteOrder;
 import java.nio.file.Files;
@@ -226,6 +227,10 @@ public class NBTIO {
 
     public static void writeGZIPCompressed(CompoundTag tag, OutputStream outputStream, ByteOrder endianness) throws IOException {
         write(tag, new PGZIPOutputStream(outputStream), endianness);
+    }
+
+    public static void writeZSTDCompressed(CompoundTag tag, OutputStream outputStream, ByteOrder endianness) throws IOException {
+        write(tag, new ZstdOutputStream(outputStream), endianness);
     }
 
     public static byte[] writeNetworkGZIPCompressed(CompoundTag tag) throws IOException {

@@ -306,8 +306,8 @@ public class Level implements ChunkManager, Metadatable {
         final boolean convert = provider.equals(McRegion.class) || provider.equals(LevelDB.class);
         final boolean isRiver = provider.equals(River.class) && this.getClass().equals(RiverLevel.class);
         try {
-            if (!isRiver) {
-                this.provider = provider.getConstructor(Level.class, String.class, boolean.class)
+            if (isRiver) {
+                this.provider = provider.getConstructor(RiverLevel.class, String.class, boolean.class)
                     .newInstance(this, path, false);
             } else if (convert) {
                 final String newPath = new File(path).getParent() + "/" + name + ".old/";

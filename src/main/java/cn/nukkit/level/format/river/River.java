@@ -3,13 +3,17 @@ package cn.nukkit.level.format.river;
 import cn.nukkit.level.GameRules;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.format.LevelProvider;
+import cn.nukkit.level.format.anvil.Anvil;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.level.format.generic.BaseLevelProvider;
 import cn.nukkit.level.generator.Generator;
+import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.scheduler.AsyncTask;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteOrder;
 import java.util.Map;
 
 public class River extends BaseLevelProvider {
@@ -53,6 +57,14 @@ public class River extends BaseLevelProvider {
         final File worldDir = new File(path);
         final File slimeFile = new File(worldDir, name + ".slime");
         slimeFile.createNewFile();
+        final CompoundTag data = new CompoundTag("Data")
+            .putString("LevelName", name)
+            .putInt("SpawnX", 0)
+            .putInt("SpawnY", 64)
+            .putInt("SpawnZ", 0)
+            .putLong("Time", 0)
+            .putLong("SizeOnDisk", 0);
+        NBTIO.writeZSTDCompressed(data, new FileOutputStream(slimeFile), ByteOrder.BIG_ENDIAN);
     }
 
     @Override

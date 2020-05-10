@@ -4,9 +4,9 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.format.ChunkSection;
-import cn.nukkit.level.format.LevelProviderManager;
 import cn.nukkit.level.format.anvil.util.BlockStorage;
 import cn.nukkit.level.format.anvil.util.NibbleArray;
+import cn.nukkit.level.format.generic.BaseLevelProvider;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.DoubleTag;
@@ -34,7 +34,7 @@ public final class RiverLevel extends Level {
 
     public RiverLevel(final Server server, final String name, final String path, final Map<Long, RiverChunk> chunks,
                       final CompoundTag extraData, final List<CompoundTag> worldMaps) {
-        super(server, name, path, Objects.requireNonNull(LevelProviderManager.getProvider("river")));
+        super(server, name, path, River.class);
         this.chunks = chunks;
         this.extraData = extraData;
         this.worldMaps = worldMaps;

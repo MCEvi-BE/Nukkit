@@ -49,7 +49,7 @@ public abstract class BaseLevelProvider implements LevelProvider {
     public BaseLevelProvider(final Level level, final String path, final boolean f) {
         this.level = level;
         this.path = path;
-        this.spawn = new Vector3(256.0d, 90.0d, 256.0d);
+        this.spawn = new Vector3(0.0d, 64.0d, 0.0d);
         final File worldDir = new File(this.getPath());
         final File[] files = worldDir.listFiles();
         if (files == null) {
