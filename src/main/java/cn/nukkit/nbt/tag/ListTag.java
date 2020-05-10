@@ -24,6 +24,11 @@ public class ListTag<T extends Tag> extends Tag {
         super(name);
     }
 
+    public ListTag(final String name, final List<T> list) {
+        super(name);
+        this.list = list;
+    }
+
     @Override
     void write(NBTOutputStream dos) throws IOException {
         if (list.size() > 0) type = list.get(0).getId();

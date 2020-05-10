@@ -2,7 +2,6 @@ package cn.nukkit.nbt.stream;
 
 import cn.nukkit.nbt.tag.*;
 import cn.nukkit.utils.VarInt;
-
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -17,60 +16,63 @@ import java.util.List;
  * Nukkit Project
  */
 public class NBTOutputStream implements DataOutput, AutoCloseable {
+
     private final DataOutputStream stream;
+
     private final ByteOrder endianness;
+
     private final boolean network;
 
-    public NBTOutputStream(OutputStream stream) {
+    public NBTOutputStream(final OutputStream stream) {
         this(stream, ByteOrder.BIG_ENDIAN);
     }
 
-    public NBTOutputStream(OutputStream stream, ByteOrder endianness) {
+    public NBTOutputStream(final OutputStream stream, final ByteOrder endianness) {
         this(stream, endianness, false);
     }
 
-    public NBTOutputStream(OutputStream stream, ByteOrder endianness, boolean network) {
+    public NBTOutputStream(final OutputStream stream, final ByteOrder endianness, final boolean network) {
         this.stream = stream instanceof DataOutputStream ? (DataOutputStream) stream : new DataOutputStream(stream);
         this.endianness = endianness;
         this.network = network;
     }
 
     public ByteOrder getEndianness() {
-        return endianness;
+        return this.endianness;
     }
 
     public boolean isNetwork() {
-        return network;
+        return this.network;
     }
 
     @Override
-    public void write(byte[] bytes) throws IOException {
-        this.stream.write(bytes);
-    }
-
-    @Override
-    public void write(byte[] b, int off, int len) throws IOException {
-        this.stream.write(b, off, len);
-    }
-
-    @Override
-    public void write(int b) throws IOException {
+    public void write(final int b) throws IOException {
         this.stream.write(b);
     }
 
     @Override
-    public void writeBoolean(boolean v) throws IOException {
+    public void write(final byte[] bytes) throws IOException {
+        this.stream.write(bytes);
+    }
+
+    @Override
+    public void write(final byte[] b, final int off, final int len) throws IOException {
+        this.stream.write(b, off, len);
+    }
+
+    @Override
+    public void writeBoolean(final boolean v) throws IOException {
         this.stream.writeBoolean(v);
     }
 
     @Override
-    public void writeByte(int v) throws IOException {
+    public void writeByte(final int v) throws IOException {
         this.stream.writeByte(v);
     }
 
     @Override
     public void writeShort(int v) throws IOException {
-        if (endianness == ByteOrder.LITTLE_ENDIAN) {
+        if (this.endianness == ByteOrder.LITTLE_ENDIAN) {
             v = Integer.reverseBytes(v) >> 16;
         }
         this.stream.writeShort(v);
@@ -78,7 +80,7 @@ public class NBTOutputStream implements DataOutput, AutoCloseable {
 
     @Override
     public void writeChar(int v) throws IOException {
-        if (endianness == ByteOrder.LITTLE_ENDIAN) {
+        if (this.endianness == ByteOrder.LITTLE_ENDIAN) {
             v = Character.reverseBytes((char) v);
         }
         this.stream.writeChar(v);
@@ -86,10 +88,10 @@ public class NBTOutputStream implements DataOutput, AutoCloseable {
 
     @Override
     public void writeInt(int v) throws IOException {
-        if (network) {
+        if (this.network) {
             VarInt.writeVarInt(this.stream, v);
         } else {
-            if (endianness == ByteOrder.LITTLE_ENDIAN) {
+            if (this.endianness == ByteOrder.LITTLE_ENDIAN) {
                 v = Integer.reverseBytes(v);
             }
             this.stream.writeInt(v);
@@ -98,10 +100,10 @@ public class NBTOutputStream implements DataOutput, AutoCloseable {
 
     @Override
     public void writeLong(long v) throws IOException {
-        if (network) {
+        if (this.network) {
             VarInt.writeVarLong(this.stream, v);
         } else {
-            if (endianness == ByteOrder.LITTLE_ENDIAN) {
+            if (this.endianness == ByteOrder.LITTLE_ENDIAN) {
                 v = Long.reverseBytes(v);
             }
             this.stream.writeLong(v);
@@ -109,38 +111,38 @@ public class NBTOutputStream implements DataOutput, AutoCloseable {
     }
 
     @Override
-    public void writeFloat(float v) throws IOException {
+    public void writeFloat(final float v) throws IOException {
         int i = Float.floatToIntBits(v);
-        if (endianness == ByteOrder.LITTLE_ENDIAN) {
+        if (this.endianness == ByteOrder.LITTLE_ENDIAN) {
             i = Integer.reverseBytes(i);
         }
         this.stream.writeInt(i);
     }
 
     @Override
-    public void writeDouble(double v) throws IOException {
+    public void writeDouble(final double v) throws IOException {
         long l = Double.doubleToLongBits(v);
-        if (endianness == ByteOrder.LITTLE_ENDIAN) {
+        if (this.endianness == ByteOrder.LITTLE_ENDIAN) {
             l = Long.reverseBytes(l);
         }
         this.stream.writeLong(l);
     }
 
     @Override
-    public void writeBytes(String s) throws IOException {
+    public void writeBytes(final String s) throws IOException {
         this.stream.writeBytes(s);
     }
 
     @Override
-    public void writeChars(String s) throws IOException {
+    public void writeChars(final String s) throws IOException {
         this.stream.writeChars(s);
     }
 
     @Override
-    public void writeUTF(String s) throws IOException {
-        byte[] bytes = s.getBytes(StandardCharsets.UTF_8);
-        if (network) {
-            VarInt.writeUnsignedVarInt(stream, bytes.length);
+    public void writeUTF(final String s) throws IOException {
+        final byte[] bytes = s.getBytes(StandardCharsets.UTF_8);
+        if (this.network) {
+            VarInt.writeUnsignedVarInt(this.stream, bytes.length);
         } else {
             this.writeShort(bytes.length);
         }
@@ -152,8 +154,8 @@ public class NBTOutputStream implements DataOutput, AutoCloseable {
         this.stream.close();
     }
 
-    public void writeTag(Tag tag) throws IOException {
-        String name = tag.getName();
+    public void writeTag(final Tag tag) throws IOException {
+        final String name = tag.getName();
         this.stream.writeByte(tag.getId());
         this.stream.writeUTF(name);
         if (tag.getId() == Tag.TAG_End) {
@@ -163,7 +165,7 @@ public class NBTOutputStream implements DataOutput, AutoCloseable {
         }
     }
 
-    private void writeTagPayload(Tag tag) throws IOException {
+    private void writeTagPayload(final Tag tag) throws IOException {
         switch (tag.getId()) {
             case 0:
                 this.writeEndTagPayload((EndTag) tag);
@@ -213,67 +215,64 @@ public class NBTOutputStream implements DataOutput, AutoCloseable {
 
     }
 
-    private void writeByteTagPayload(ByteTag tag) throws IOException {
+    private void writeByteTagPayload(final ByteTag tag) throws IOException {
         this.stream.writeByte(tag.getData());
     }
 
-    private void writeByteArrayTagPayload(ByteArrayTag tag) throws IOException {
-        byte[] bytes = tag.getData();
+    private void writeByteArrayTagPayload(final ByteArrayTag tag) throws IOException {
+        final byte[] bytes = tag.getData();
         this.stream.writeInt(bytes.length);
         this.stream.write(bytes);
     }
 
-    private void writeCompoundTagPayload(CompoundTag tag) throws IOException {
-        Iterator var2 = tag.parseValue().values().iterator();
-
-        while (var2.hasNext()) {
-            Tag childTag = (Tag) var2.next();
-            this.writeTag(childTag);
+    private void writeCompoundTagPayload(final CompoundTag tag) throws IOException {
+        for (final Tag o : tag.values().values()) {
+            this.writeTag(o);
         }
 
         this.stream.writeByte(Tag.TAG_End);
     }
 
-    private void writeListTagPayload(ListTag<? extends Tag> tag) throws IOException {
-        List<? extends Tag> tags = tag.getAll();
-        int size = tags.size();
+    private void writeListTagPayload(final ListTag<? extends Tag> tag) throws IOException {
+        final List<? extends Tag> tags = tag.getAll();
+        final int size = tags.size();
         this.stream.writeByte(tag.type);
         this.stream.writeInt(size);
-        Iterator<? extends Tag> var4 = tags.iterator();
+        final Iterator<? extends Tag> var4 = tags.iterator();
 
         while (var4.hasNext()) {
-            Tag tag1 = var4.next();
+            final Tag tag1 = var4.next();
             this.writeTagPayload(tag1);
         }
 
     }
 
-    private void writeStringTagPayload(StringTag tag) throws IOException {
+    private void writeStringTagPayload(final StringTag tag) throws IOException {
         this.stream.writeUTF(tag.parseValue());
     }
 
-    private void writeDoubleTagPayload(DoubleTag tag) throws IOException {
+    private void writeDoubleTagPayload(final DoubleTag tag) throws IOException {
         this.stream.writeDouble(tag.getData());
     }
 
-    private void writeFloatTagPayload(FloatTag tag) throws IOException {
+    private void writeFloatTagPayload(final FloatTag tag) throws IOException {
         this.stream.writeFloat(tag.getData());
     }
 
-    private void writeLongTagPayload(LongTag tag) throws IOException {
+    private void writeLongTagPayload(final LongTag tag) throws IOException {
         this.stream.writeLong(tag.getData());
     }
 
-    private void writeIntTagPayload(IntTag tag) throws IOException {
+    private void writeIntTagPayload(final IntTag tag) throws IOException {
         this.stream.writeInt(tag.getData());
     }
 
-    private void writeShortTagPayload(ShortTag tag) throws IOException {
+    private void writeShortTagPayload(final ShortTag tag) throws IOException {
         this.stream.writeShort(tag.getData());
     }
 
-    private void writeIntArrayTagPayload(IntArrayTag tag) throws IOException {
-        int[] ints = tag.getData();
+    private void writeIntArrayTagPayload(final IntArrayTag tag) throws IOException {
+        final int[] ints = tag.getData();
         this.stream.writeInt(ints.length);
 
         for (int i = 0; i < ints.length; ++i) {
@@ -282,8 +281,8 @@ public class NBTOutputStream implements DataOutput, AutoCloseable {
 
     }
 
-    private void writeLongArrayTagPayload(LongArrayTag tag) throws IOException {
-        long[] longs = tag.getData();
+    private void writeLongArrayTagPayload(final LongArrayTag tag) throws IOException {
+        final long[] longs = tag.getData();
         this.stream.writeInt(longs.length);
 
         for (int i = 0; i < longs.length; ++i) {
@@ -292,8 +291,8 @@ public class NBTOutputStream implements DataOutput, AutoCloseable {
 
     }
 
-    private void writeShortArrayTagPayload(ShortArrayTag tag) throws IOException {
-        short[] shorts = tag.getData();
+    private void writeShortArrayTagPayload(final ShortArrayTag tag) throws IOException {
+        final short[] shorts = tag.getData();
         this.stream.writeInt(shorts.length);
 
         for (int i = 0; i < shorts.length; ++i) {
@@ -302,7 +301,7 @@ public class NBTOutputStream implements DataOutput, AutoCloseable {
 
     }
 
-    private void writeEndTagPayload(EndTag tag) {
+    private void writeEndTagPayload(final EndTag tag) {
     }
 
 }

@@ -4,16 +4,20 @@ import cn.nukkit.Server;
 import cn.nukkit.nbt.stream.NBTOutputStream;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.ListTag;
+import cn.nukkit.swm.api.exceptions.UnknownWorldException;
 import cn.nukkit.swm.api.exceptions.WorldAlreadyExistsException;
+import cn.nukkit.swm.api.exceptions.WorldInUseException;
 import cn.nukkit.swm.api.loaders.SlimeLoader;
 import cn.nukkit.swm.api.utils.SlimeFormat;
 import cn.nukkit.swm.api.world.SlimeChunk;
 import cn.nukkit.swm.api.world.SlimeChunkSection;
 import cn.nukkit.swm.api.world.SlimeWorld;
 import cn.nukkit.swm.api.world.properties.SlimePropertyMap;
+import cn.nukkit.swm.loader.FileLoader;
 import com.github.luben.zstd.Zstd;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteOrder;
 import java.util.*;
@@ -44,6 +48,14 @@ public class CraftSlimeWorld implements SlimeWorld {
     private SlimeLoader loader;
 
     private byte version;
+
+    public static void main(final String[] args) throws IOException {
+        final File file = new File("C:\\Users\\hasan\\AppData\\Roaming\\.infumia\\saves");
+        final FileLoader loader = new FileLoader(file);
+        final CraftSlimeWorld world = new CraftSlimeWorld("test", new HashMap<>(), new CompoundTag(),
+            new ArrayList<>(), new SlimePropertyMap(), false, false, loader, (byte) 2);
+        loader.saveWorld("test",  world.serialize(), false);
+    }
 
     private static void writeBitSetAsBytes(final DataOutputStream outStream, final BitSet set, final int fixedSize) throws IOException {
         final byte[] array = set.toByteArray();
@@ -179,6 +191,8 @@ public class CraftSlimeWorld implements SlimeWorld {
             .readOnly(this.readOnly).build();
     }
 
+    // World Serialization methods
+
     @Override
     public SlimeWorld clone(final String worldName) {
         try {
@@ -187,8 +201,6 @@ public class CraftSlimeWorld implements SlimeWorld {
             return null; // Never going to happen
         }
     }
-
-    // World Serialization methods
 
     @Override
     public SlimeWorld clone(final String worldName, final SlimeLoader loader) throws WorldAlreadyExistsException, IOException {
@@ -297,9 +309,10 @@ public class CraftSlimeWorld implements SlimeWorld {
             outStream.write(compressedChunkData);
 
             // Tile Entities
-            final List<CompoundTag> tileEntitiesList = sortedChunks.stream().flatMap(chunk -> chunk.getTileEntities().stream()).collect(Collectors.toList());
-            final ListTag<CompoundTag> tileEntitiesNbtList = new ListTag<>("tiles");
-            tileEntitiesList.forEach(tileEntitiesNbtList::add);
+            final List<CompoundTag> tileEntitiesList = sortedChunks.stream()
+                .flatMap(chunk -> chunk.getTileEntities().stream())
+                .collect(Collectors.toList());
+            final ListTag<CompoundTag> tileEntitiesNbtList = new ListTag<>("tiles", tileEntitiesList);
             final CompoundTag tileEntitiesCompound = new CompoundTag("");
             final List<ListTag<CompoundTag>> listTags = Collections.singletonList(tileEntitiesNbtList);
             listTags.forEach(compoundTagListTag ->
