@@ -46,21 +46,11 @@ public abstract class BaseLevelProvider implements LevelProvider {
 
     private Vector3 spawn;
 
-    public BaseLevelProvider(final Level level, final String path, final boolean f) throws IOException {
-
+    public BaseLevelProvider(final Level level, final String path, final boolean f) {
         this.level = level;
         this.path = path;
-
-        if (!new File("fastworld/").exists()) {
-            new File("fastworld/").mkdir();
-        }
-
-        System.out.println(path);
-        if (!new File("fastworld/" + path + ".world").exists()) {
-            new File("fastworld/" + path + ".world").createNewFile();
-        }
-
         this.spawn = new Vector3(256.0d, 90.0d, 256.0d);
+        System.out.println(path);
     }
 
     public BaseLevelProvider(final Level level, final String path) throws IOException {
