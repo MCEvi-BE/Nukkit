@@ -84,12 +84,12 @@ public class River extends BaseLevelProvider {
 
     @Override
     public void saveChunk(final int X, final int Z) {
-        System.out.println("test");
+
     }
 
     @Override
     public void saveChunk(final int X, final int Z, final FullChunk chunk) {
-        System.out.println("test");
+
     }
 
     @Override
@@ -99,7 +99,6 @@ public class River extends BaseLevelProvider {
 
     @Override
     public GameRules getGamerules() {
-        System.out.println("test");
         return GameRules.getDefault();
     }
 
