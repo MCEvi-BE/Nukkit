@@ -1614,7 +1614,9 @@ public class Server {
         final Level level;
         try {
             if (provider.equals(River.class)) {
-                final FileLoader fileLoader = new FileLoader(new File(path));
+                final File worldDir = new File(path);
+                final FileLoader fileLoader = new FileLoader(worldDir);
+                worldDir.exists();
                 level = RiverLevel.deserialize(name, path, fileLoader.loadWorld(name, false));
             } else {
                 level = new Level(this, name, path, provider);
