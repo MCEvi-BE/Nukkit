@@ -54,6 +54,9 @@ public class River extends BaseLevelProvider {
                                 final Class<? extends Generator> generator, final Map<String, String> options)
         throws IOException {
         final File worldDir = new File(path);
+        if (!worldDir.exists()){
+            worldDir.mkdirs();
+        }
         final File slimeFile = new File(worldDir, name + ".slime");
         slimeFile.createNewFile();
         final CompoundTag data = new CompoundTag("Data")
