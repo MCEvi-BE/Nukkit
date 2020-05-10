@@ -59,8 +59,8 @@ public abstract class BaseLevelProvider implements LevelProvider {
         if (!new File("fastworld/" + path + ".world").exists()) {
             new File("fastworld/" + path + ".world").createNewFile();
         }
-        
-        this.spawn = new Vector3(256, 90, 256);
+
+        this.spawn = new Vector3(256.0d, 90.0d, 256.0d);
     }
 
     public BaseLevelProvider(final Level level, final String path) throws IOException {
