@@ -37,6 +37,7 @@ public final class RiverLevel extends Level {
         this.chunks = chunks;
         this.extraData = extraData;
         this.worldMaps = worldMaps;
+
     }
 
     public static RiverLevel deserialize(final Server server, final String name, final String path, final byte[] data)

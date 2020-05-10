@@ -463,4 +463,8 @@ public abstract class BaseLevelProvider implements LevelProvider {
         return this.levelData;
     }
 
+    public void setLevelData(final CompoundTag levelData) {
+        this.levelData = levelData;
+    }
+
 }

@@ -42,6 +42,7 @@ import cn.nukkit.level.format.river.RiverLevel;
 import cn.nukkit.level.generator.Void;
 import cn.nukkit.level.generator.*;
 import cn.nukkit.math.NukkitMath;
+import cn.nukkit.math.Vector3;
 import cn.nukkit.metadata.EntityMetadataStore;
 import cn.nukkit.metadata.LevelMetadataStore;
 import cn.nukkit.metadata.PlayerMetadataStore;
@@ -1683,16 +1684,20 @@ public class Server {
             if (provider.equals(River.class)) {
                 final FileLoader loader = new FileLoader(new File(path));
                 final List<CompoundTag> maps = new ArrayList<>();
-                final CompoundTag data = new CompoundTag("Data")
+                final CompoundTag data = new CompoundTag("maps")
                     .putString("LevelName", name)
                     .putDouble("SpawnX", 0.0d)
                     .putDouble("SpawnY", 64.0d)
                     .putDouble("SpawnZ", 0.0d)
                     .putLong("Time", 0L)
                     .putLong("SizeOnDisk", 0L);
+                final Vector3 spawn = new Vector3(0.0d, 64.0d, 0.0d);
                 maps.add(data);
                 final RiverLevel riverLevel = new RiverLevel(this, name, path, new HashMap<>(),
                     new CompoundTag(""), maps);
+                final River riverprovider = (River) riverLevel.getProvider();
+                riverprovider.setLevelData(data);
+                riverprovider.setSpawn(spawn);
                 level = riverLevel;
                 final byte[] serialized = riverLevel.serialize();
                 loader.saveWorld(name, serialized, false);

@@ -231,6 +231,8 @@ public class Level implements ChunkManager, Metadatable {
 
     private final Map<Long, Map<Character, Object>> lightQueue = new ConcurrentHashMap<>(8, 0.9f, 1);
 
+    private final String folderName;
+
     public boolean stopTime;
 
     public float skyLightSubtracted;
@@ -248,8 +250,6 @@ public class Level implements ChunkManager, Metadatable {
     private BlockUpdateScheduler updateQueue;
 
     private boolean cacheChunks;
-
-    private String folderName;
 
     private boolean useSections;
 
@@ -334,8 +334,9 @@ public class Level implements ChunkManager, Metadatable {
             }
             old.close();
         }
+        this.folderName = name;
         if (!isRiver) {
-            this.prepareLevel(name, path, provider, convert);
+            this.prepareLevel(provider);
         }
     }
 
@@ -2843,22 +2844,22 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     @Override
-    public void setMetadata(final String metadataKey, final MetadataValue newMetadataValue) throws Exception {
+    public void setMetadata(final String metadataKey, final MetadataValue newMetadataValue) {
         this.server.getLevelMetadata().setMetadata(this, metadataKey, newMetadataValue);
     }
 
     @Override
-    public List<MetadataValue> getMetadata(final String metadataKey) throws Exception {
+    public List<MetadataValue> getMetadata(final String metadataKey) {
         return this.server.getLevelMetadata().getMetadata(this, metadataKey);
     }
 
     @Override
-    public boolean hasMetadata(final String metadataKey) throws Exception {
+    public boolean hasMetadata(final String metadataKey) {
         return this.server.getLevelMetadata().hasMetadata(this, metadataKey);
     }
 
     @Override
-    public void removeMetadata(final String metadataKey, final Plugin owningPlugin) throws Exception {
+    public void removeMetadata(final String metadataKey, final Plugin owningPlugin) {
         this.server.getLevelMetadata().removeMetadata(this, metadataKey, owningPlugin);
     }
 
@@ -3350,8 +3351,8 @@ public class Level implements ChunkManager, Metadatable {
         return false;
     }
 
-    private void prepareLevel(final String name, final String path, final Class<? extends LevelProvider> provider, final boolean convert) {
-        this.provider.updateLevelName(name);
+    private void prepareLevel(final Class<? extends LevelProvider> provider) {
+        this.provider.updateLevelName(this.folderName);
 
         this.server.getLogger().info(this.server.getLanguage().translateString("nukkit.level.preparing",
             TextFormat.GREEN + this.provider.getName() + TextFormat.WHITE));
@@ -3364,7 +3365,6 @@ public class Level implements ChunkManager, Metadatable {
             throw new RuntimeException(e);
         }
 
-        this.folderName = name;
         this.time = this.provider.getTime();
 
         this.raining = this.provider.isRaining();
