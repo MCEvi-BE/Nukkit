@@ -33,6 +33,7 @@ import cn.nukkit.level.format.generic.BaseLevelProvider;
 import cn.nukkit.level.format.generic.EmptyChunkSection;
 import cn.nukkit.level.format.leveldb.LevelDB;
 import cn.nukkit.level.format.mcregion.McRegion;
+import cn.nukkit.level.format.river.River;
 import cn.nukkit.level.generator.Generator;
 import cn.nukkit.level.generator.PopChunkManager;
 import cn.nukkit.level.generator.task.GenerationTask;
@@ -302,8 +303,12 @@ public class Level implements ChunkManager, Metadatable {
         this.autoSave = server.getAutoSave();
 
         final boolean convert = provider.equals(McRegion.class) || provider.equals(LevelDB.class);
+        final boolean isRiver = provider.equals(River.class);
         try {
-            if (convert) {
+            if (isRiver) {
+                this.provider = provider.getConstructor(Level.class, String.class, boolean.class)
+                    .newInstance(this, path, false);
+            } else if (convert) {
                 final String newPath = new File(path).getParent() + "/" + name + ".old/";
                 new File(path).renameTo(new File(newPath));
                 this.provider = provider.getConstructor(Level.class, String.class).newInstance(this, newPath);

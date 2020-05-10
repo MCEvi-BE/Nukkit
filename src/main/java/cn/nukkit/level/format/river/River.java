@@ -9,8 +9,8 @@ import java.io.IOException;
 
 public class River extends BaseLevelProvider {
 
-    public River(final Level level, final String path) throws IOException {
-        super(level, path);
+    public River(final Level level, final String path, final boolean f) throws IOException {
+        super(level, path, f);
     }
 
     public static String getProviderName() {
