@@ -8,6 +8,7 @@ import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.level.format.generic.BaseLevelProvider;
 import cn.nukkit.level.generator.Generator;
 import cn.nukkit.scheduler.AsyncTask;
+import cn.nukkit.utils.ChunkException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
@@ -65,27 +66,51 @@ public class River extends BaseLevelProvider {
 
     @Override
     public BaseFullChunk getEmptyChunk(final int x, final int z) {
-        return null;
+        return new RiverChunk(x, z);
     }
 
     @Override
-    public void saveChunk(final int X, final int Z) {
-        System.out.println("test");
+    public void saveChunk(final int x, final int z) {
+        this.saveChunk(x, z, this.getChunk(x, z));
     }
 
     @Override
-    public void saveChunk(final int X, final int Z, final FullChunk chunk) {
-        System.out.println("test");
+    public void saveChunk(final int x, final int z, final FullChunk chunk) {
+        if (chunk instanceof RiverChunk) {
+            try {
+                this.getLevel().setChunk(x, z, (RiverChunk) chunk);
+            } catch (final Exception e) {
+                throw new ChunkException("Error saving chunk (" + x + ", " + z + ")", e);
+            }
+        }
     }
 
     @Override
     public BaseFullChunk loadChunk(final long index, final int chunkX, final int chunkZ, final boolean create) {
-        return null;
+        final RiverChunk chunk = this.getLevel().getChunk(chunkX, chunkZ);
+        final RiverChunk tmp;
+        if (chunk == null) {
+            tmp = new RiverChunk(chunkX, chunkZ);
+            try {
+                tmp.load(true);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            tmp.
+        } else {
+            tmp = chunk;
+        }
+        return tmp;
     }
 
     @Override
     public String getGenerator() {
         return "void";
+    }
+
+    @Override
+    public RiverLevel getLevel() {
+        return (RiverLevel) super.getLevel();
     }
 
     @Override

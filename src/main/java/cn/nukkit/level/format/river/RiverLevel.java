@@ -270,7 +270,7 @@ public final class RiverLevel extends Level {
         return floor - (int) (Double.doubleToRawLongBits(num) >>> 63);
     }
 
-    private static void serializeChunk(final RiverChunk riverChunk, final DataOutputStream stream) throws IOException {
+    public static void serializeChunk(final RiverChunk riverChunk, final DataOutputStream stream) throws IOException {
         final byte[] heightMap = riverChunk.getHeightMapArray();
         for (int i = 0; i < 256; i++) {
             stream.writeByte(heightMap[i]);
