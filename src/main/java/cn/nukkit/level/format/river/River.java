@@ -1,6 +1,7 @@
 package cn.nukkit.level.format.river;
 
 import cn.nukkit.level.GameRules;
+import cn.nukkit.level.Level;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.format.LevelProvider;
 import cn.nukkit.level.format.generic.BaseFullChunk;
@@ -17,7 +18,7 @@ import java.util.Map;
 
 public class River extends BaseLevelProvider {
 
-    public River(final RiverLevel level, final String path, final boolean f) throws IOException {
+    public River(final Level level, final String path, final boolean f) throws IOException {
         super(level, path, f);
     }
 
@@ -70,16 +71,6 @@ public class River extends BaseLevelProvider {
     }
 
     @Override
-    public BaseFullChunk loadChunk(final long index, final int chunkX, final int chunkZ, final boolean create) {
-        return null;
-    }
-
-    @Override
-    public GameRules getGamerules() {
-        return GameRules.getDefault();
-    }
-
-    @Override
     public AsyncTask requestChunkTask(final int X, final int Z) {
         return null;
     }
@@ -97,6 +88,16 @@ public class River extends BaseLevelProvider {
     @Override
     public void saveChunk(final int X, final int Z, final FullChunk chunk) {
 
+    }
+
+    @Override
+    public BaseFullChunk loadChunk(final long index, final int chunkX, final int chunkZ, final boolean create) {
+        return null;
+    }
+
+    @Override
+    public GameRules getGamerules() {
+        return GameRules.getDefault();
     }
 
 }
