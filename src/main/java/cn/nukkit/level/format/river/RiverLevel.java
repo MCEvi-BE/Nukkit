@@ -4,6 +4,7 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.format.ChunkSection;
+import cn.nukkit.level.format.LevelProviderManager;
 import cn.nukkit.level.format.anvil.util.BlockStorage;
 import cn.nukkit.level.format.anvil.util.NibbleArray;
 import cn.nukkit.nbt.NBTIO;
@@ -31,15 +32,15 @@ public final class RiverLevel extends Level {
 
     private final List<CompoundTag> worldMaps;
 
-    public RiverLevel(final String name, final String path, final Map<Long, RiverChunk> chunks,
+    public RiverLevel(final Server server, final String name, final String path, final Map<Long, RiverChunk> chunks,
                       final CompoundTag extraData, final List<CompoundTag> worldMaps) {
-        super(Server.getInstance(), name, path, null);
+        super(server, name, path, Objects.requireNonNull(LevelProviderManager.getProvider("river")));
         this.chunks = chunks;
         this.extraData = extraData;
         this.worldMaps = worldMaps;
     }
 
-    public static RiverLevel deserialize(final String name, final String path, final byte[] data) throws Exception {
+    public static RiverLevel deserialize(final Server server, final String name, final String path, final byte[] data) throws Exception {
         final DataInputStream stream = new DataInputStream(new ByteArrayInputStream(data));
 
         //Head------------------------------------
@@ -180,7 +181,7 @@ public final class RiverLevel extends Level {
             mapList = mapsCompound.getList("maps", CompoundTag.class).getAll();
         }
 
-        return new RiverLevel(name, path, chunks, extraCompound, mapList);
+        return new RiverLevel(server, name, path, chunks, extraCompound, mapList);
     }
 
     private static Map<Long, RiverChunk> readChunks(final int minX, final int minZ, final int width, final int depth,
@@ -460,6 +461,7 @@ public final class RiverLevel extends Level {
         }
     }
 
+    @Override
     public RiverChunk getChunk(final int x, final int z) {
         synchronized (this.chunks) {
             final Long index = (long) z * Integer.MAX_VALUE + (long) x;
@@ -468,6 +470,7 @@ public final class RiverLevel extends Level {
         }
     }
 
+    @Override
     public Map<Long, RiverChunk> getChunks() {
         return this.chunks;
     }

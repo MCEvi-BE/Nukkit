@@ -39,10 +39,8 @@ import cn.nukkit.level.format.mcregion.McRegion;
 import cn.nukkit.level.format.river.FileLoader;
 import cn.nukkit.level.format.river.River;
 import cn.nukkit.level.format.river.RiverLevel;
-import cn.nukkit.level.generator.Flat;
-import cn.nukkit.level.generator.Generator;
-import cn.nukkit.level.generator.Nether;
-import cn.nukkit.level.generator.Normal;
+import cn.nukkit.level.generator.Void;
+import cn.nukkit.level.generator.*;
 import cn.nukkit.math.NukkitMath;
 import cn.nukkit.metadata.EntityMetadataStore;
 import cn.nukkit.metadata.LevelMetadataStore;
@@ -523,6 +521,7 @@ public class Server {
         Generator.addGenerator(Normal.class, "normal", Generator.TYPE_INFINITE);
         Generator.addGenerator(Normal.class, "default", Generator.TYPE_INFINITE);
         Generator.addGenerator(Nether.class, "nether", Generator.TYPE_NETHER);
+        Generator.addGenerator(Void.class, "void", Generator.TYPE_VOID);
         //todo: add old generator and hell generator
 
         for (final String name : this.getConfig("worlds", new HashMap<String, Object>()).keySet()) {
@@ -1614,10 +1613,11 @@ public class Server {
         final Level level;
         try {
             if (provider.equals(River.class)) {
-                final File worldDir = new File(path);
-                final FileLoader fileLoader = new FileLoader(worldDir);
-                worldDir.exists();
-                level = RiverLevel.deserialize(name, path, fileLoader.loadWorld(name, false));
+                final FileLoader fileLoader = new FileLoader(new File(path));
+                if (!fileLoader.worldExists(name)) {
+                    return false;
+                }
+                level = RiverLevel.deserialize(this, name, path, fileLoader.loadWorld(name, false));
             } else {
                 level = new Level(this, name, path, provider);
             }
@@ -1677,9 +1677,14 @@ public class Server {
 
         final Level level;
         try {
-            provider.getMethod("generate", String.class, String.class, long.class, Class.class, Map.class).invoke(null, path, name, seed, generator, options);
+            provider.getMethod("generate", String.class, String.class, long.class, Class.class, Map.class)
+                .invoke(null, path, name, seed, generator, options);
 
-            level = new Level(this, name, path, provider);
+            if (provider.equals(River.class)) {
+                level = new RiverLevel(this, name, path, new HashMap<>(), new CompoundTag(""), new ArrayList<>());
+            } else {
+                level = new Level(this, name, path, provider);
+            }
             this.levels.put(level.getId(), level);
 
             level.initLevel();

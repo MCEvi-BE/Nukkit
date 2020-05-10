@@ -6,6 +6,7 @@ import cn.nukkit.level.Level;
 import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.math.Vector3;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -17,6 +18,7 @@ public abstract class Generator implements BlockID {
     public static final int TYPE_INFINITE = 1;
     public static final int TYPE_FLAT = 2;
     public static final int TYPE_NETHER = 3;
+    public static final int TYPE_VOID = 4;
 
     public abstract int getId();
 
@@ -46,7 +48,7 @@ public abstract class Generator implements BlockID {
     }
 
     public static Class<? extends Generator> getGenerator(String name) {
-        name = name.toLowerCase();
+        name = name.toLowerCase(Locale.ENGLISH);
         if (Generator.nameList.containsKey(name)) {
             return Generator.nameList.get(name);
         }
