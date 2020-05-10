@@ -119,11 +119,7 @@ public class TestSerialize {
         mapsTag = new byte[mapsTagLength];
 
         stream.read(compressedMapsTag);
-
         //LevelDat-------------------------------------
-
-
-
 
         //Decompress-------------------------------------
         Zstd.decompress(chunkData, compressedChunkData);
@@ -139,25 +135,28 @@ public class TestSerialize {
 
 
         //Entities
-        CompoundTag entitiesCompound = NBTIO.read(entities, ByteOrder.BIG_ENDIAN);
+        if (hasEntities) {
+            CompoundTag entitiesCompound = NBTIO.read(entities, ByteOrder.BIG_ENDIAN);
 
-        ListTag<CompoundTag> entitiesList = entitiesCompound.getList("entities", CompoundTag.class);
+            ListTag<CompoundTag> entitiesList = entitiesCompound.getList("entities", CompoundTag.class);
 
-        for (CompoundTag tag : entitiesList.getAll())
-        {
-            ListTag<DoubleTag> listTag = tag.getList("Pos", DoubleTag.class);
+            for (CompoundTag tag : entitiesList.getAll())
+            {
+                ListTag<DoubleTag> listTag = tag.getList("Pos", DoubleTag.class);
 
-            int chunkX = floor(listTag.get(0).getData()) >> 4;
-            int chunkZ = floor(listTag.get(2).getData()) >> 4;
-            long chunkKey = ((long) chunkZ) * Integer.MAX_VALUE + ((long) chunkX);
-            Chunk chunk = chunks.get(chunkKey);
+                int chunkX = floor(listTag.get(0).getData()) >> 4;
+                int chunkZ = floor(listTag.get(2).getData()) >> 4;
+                long chunkKey = ((long) chunkZ) * Integer.MAX_VALUE + ((long) chunkX);
+                Chunk chunk = chunks.get(chunkKey);
 
-            if (chunk == null) {
-                throw new Exception("fuck entity");
+                if (chunk == null) {
+                    throw new Exception("fuck entity");
+                }
+
+                chunk.getNBTentities().add(tag);
             }
-
-            chunk.getNBTentities().add(tag);
         }
+
 
 
         // Tile Entity deserialization
@@ -200,22 +199,8 @@ public class TestSerialize {
         }
 
 
-        // World properties
 
-
-        int compressedMapArrayLength = stream.readInt();
-        int MapArrayLength = stream.readInt();
-
-        byte[] compressedMapArray = new byte[compressedMapArrayLength];
-        byte[] mapArray = new byte[MapArrayLength];
-        stream.read(compressedMapArray);
-
-
-        Zstd.decompress(compressedMapArray, MapArrayLength);
-
-        CompoundTag map = NBTIO.read(mapArray);
-
-        return new RiverWorld();
+        return new RiverWorld(chunks, extraCompound, mapList);
     }
 
 
@@ -228,6 +213,11 @@ public class TestSerialize {
     public static byte[] serialize(List<Chunk> chunks, CompoundTag extraCompound, List<CompoundTag> worldMap) throws Exception{
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         DataOutputStream outStream = new DataOutputStream(stream);
+
+        chunks.sort(Comparator.comparingLong(chunk -> (long) chunk.getZ() * Integer.MAX_VALUE + (long) chunk.getX()));
+        chunks.removeIf(chunk -> chunk == null
+                || Arrays.stream(chunk.getSections()).allMatch(Objects::isNull)); // Remove empty chunks to save space
+
 
         //Head------------------------------------
         outStream.writeByte(MAGIC);
@@ -248,6 +238,10 @@ public class TestSerialize {
         outStream.writeShort(minZ);
         outStream.writeShort(width);
         outStream.writeShort(depth);
+
+        if (width <= 0 || depth <= 0) {
+            throw new Exception("width depth error bro");
+        }
 
         //BitSet------------------------------------
         BitSet chunkBitset = new BitSet(width * depth);
@@ -328,6 +322,7 @@ public class TestSerialize {
         outStream.writeInt(compressedMapArray.length);
         outStream.writeInt(mapArray.length);
         outStream.write(compressedMapArray);
+
         //LevelDat-------------------------------------
 
 
