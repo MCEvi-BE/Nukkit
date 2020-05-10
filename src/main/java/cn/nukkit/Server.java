@@ -1681,7 +1681,14 @@ public class Server {
                 .invoke(null, path, name, seed, generator, options);
 
             if (provider.equals(River.class)) {
-                level = new RiverLevel(this, name, path, new HashMap<>(), new CompoundTag(""), new ArrayList<>());
+                final FileLoader loader = new FileLoader(new File(path));
+                final RiverLevel riverLevel = new RiverLevel(this, name, path, new HashMap<>(),
+                    new CompoundTag(""), new ArrayList<>());
+                riverLevel.addDefaultMap();
+                level = riverLevel;
+                final byte[] serialized = riverLevel.serialize();
+                loader.saveWorld(name, serialized, false);
+
             } else {
                 level = new Level(this, name, path, provider);
             }

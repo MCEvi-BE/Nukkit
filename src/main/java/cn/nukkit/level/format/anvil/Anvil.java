@@ -55,9 +55,11 @@ public class Anvil extends BaseLevelProvider {
     }
 
     public static boolean isValid(final String path) {
-        boolean isValid = new File(path + "/level.dat").exists() && new File(path + "/region/").isDirectory();
+        final File regionDir = new File(path + "/region/");
+        final File levelDatFile = new File(path + "/level.dat");
+        boolean isValid = levelDatFile.exists() && regionDir.isDirectory();
         if (isValid) {
-            for (final File file : new File(path + "/region/").listFiles((dir, name) -> Pattern.matches("^.+\\.mc[r|a]$", name))) {
+            for (final File file : regionDir.listFiles((dir, name) -> Pattern.matches("^.+\\.mc[r|a]$", name))) {
                 if (!file.getName().endsWith(".mca")) {
                     isValid = false;
                     break;

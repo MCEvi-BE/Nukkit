@@ -6,7 +6,6 @@ import cn.nukkit.level.Level;
 import cn.nukkit.level.format.ChunkSection;
 import cn.nukkit.level.format.anvil.util.BlockStorage;
 import cn.nukkit.level.format.anvil.util.NibbleArray;
-import cn.nukkit.level.format.generic.BaseLevelProvider;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.DoubleTag;
@@ -335,6 +334,18 @@ public final class RiverLevel extends Level {
         }
 
         return outByteStream.toByteArray();
+    }
+
+    public void addDefaultMap() {
+        this.worldMaps.removeIf(compoundTag -> "maps".equals(compoundTag.getName()));
+        final CompoundTag def = new CompoundTag("maps")
+            .putString("LevelName", getName())
+            .putDouble("SpawnX", 0.0d)
+            .putDouble("SpawnY", 64.0d)
+            .putDouble("SpawnZ", 0.0d)
+            .putLong("Time", 0L)
+            .putLong("SizeOnDisk", 0L);
+        this.worldMaps.add(def);
     }
 
     public byte[] serialize() throws Exception {

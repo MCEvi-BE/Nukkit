@@ -236,7 +236,7 @@ public class NBTIO {
     }
 
     public static void writeZSTDCompressed(final CompoundTag tag, final OutputStream outputStream, final ByteOrder endianness) throws IOException {
-        NBTIO.write(tag, new ZstdOutputStream(outputStream), endianness);
+        NBTIO.write(tag, new ZstdOutputStream(outputStream, 1), endianness);
     }
 
     public static byte[] writeNetworkGZIPCompressed(final CompoundTag tag) throws IOException {
