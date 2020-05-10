@@ -5,6 +5,7 @@ import cn.nukkit.level.format.ChunkSection;
 import cn.nukkit.level.format.anvil.util.BlockStorage;
 import cn.nukkit.level.format.anvil.util.NibbleArray;
 import cn.nukkit.level.format.river.Chunk;
+import cn.nukkit.level.format.river.RiverWorld;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.DoubleTag;
@@ -39,7 +40,7 @@ public class TestSerialize {
 
     }
 
-    public static void deserialize(byte[] data) throws Exception {
+    public static RiverWorld deserialize(byte[] data) throws Exception {
 
         DataInputStream stream = new DataInputStream(new ByteArrayInputStream(data));
 
@@ -214,6 +215,7 @@ public class TestSerialize {
 
         CompoundTag map = NBTIO.read(mapArray);
 
+        return new RiverWorld();
     }
 
 

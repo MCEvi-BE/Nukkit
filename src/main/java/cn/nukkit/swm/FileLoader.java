@@ -1,4 +1,4 @@
-package cn.nukkit.swm.loader;
+package cn.nukkit.swm;
 
 import cn.nukkit.swm.api.exceptions.UnknownWorldException;
 import cn.nukkit.swm.api.exceptions.WorldInUseException;
