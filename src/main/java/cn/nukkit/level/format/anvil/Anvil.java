@@ -282,11 +282,7 @@ public class Anvil extends BaseLevelProvider {
         synchronized (this.regions) {
             BaseRegionLoader region = this.regions.get(index);
             if (region == null) {
-                try {
-                    region = new RegionLoader(this, x, z);
-                } catch (final IOException e) {
-                    throw new RuntimeException(e);
-                }
+                region = new RegionLoader(this, x, z);
                 this.regions.put(index, region);
             }
             this.lastRegion.set(region);

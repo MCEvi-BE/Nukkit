@@ -3,6 +3,7 @@ package cn.nukkit.level.format;
 import cn.nukkit.Server;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -34,7 +35,7 @@ public abstract class LevelProviderManager {
     }
 
     public static Class<? extends LevelProvider> getProviderByName(String name) {
-        name = name.trim().toLowerCase();
+        name = name.trim().toLowerCase(Locale.ENGLISH);
         return providers.getOrDefault(name, null);
     }
 
