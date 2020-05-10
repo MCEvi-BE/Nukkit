@@ -7,13 +7,9 @@ import cn.nukkit.level.format.LevelProvider;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.level.format.generic.BaseLevelProvider;
 import cn.nukkit.level.generator.Generator;
-import cn.nukkit.nbt.NBTIO;
-import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.scheduler.AsyncTask;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.ByteOrder;
 import java.util.Map;
 
 public class River extends BaseLevelProvider {
@@ -85,6 +81,11 @@ public class River extends BaseLevelProvider {
     @Override
     public BaseFullChunk loadChunk(final long index, final int chunkX, final int chunkZ, final boolean create) {
         return null;
+    }
+
+    @Override
+    public String getGenerator() {
+        return "river";
     }
 
     @Override
