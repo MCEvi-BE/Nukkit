@@ -34,6 +34,7 @@ import cn.nukkit.level.format.generic.EmptyChunkSection;
 import cn.nukkit.level.format.leveldb.LevelDB;
 import cn.nukkit.level.format.mcregion.McRegion;
 import cn.nukkit.level.format.river.River;
+import cn.nukkit.level.format.river.RiverLevel;
 import cn.nukkit.level.generator.Generator;
 import cn.nukkit.level.generator.PopChunkManager;
 import cn.nukkit.level.generator.task.GenerationTask;
@@ -303,9 +304,9 @@ public class Level implements ChunkManager, Metadatable {
         this.autoSave = server.getAutoSave();
 
         final boolean convert = provider.equals(McRegion.class) || provider.equals(LevelDB.class);
-        final boolean isRiver = provider.equals(River.class);
+        final boolean isRiver = provider.equals(River.class) && this.getClass().equals(RiverLevel.class);
         try {
-            if (isRiver) {
+            if (!isRiver) {
                 this.provider = provider.getConstructor(Level.class, String.class, boolean.class)
                     .newInstance(this, path, false);
             } else if (convert) {

@@ -36,7 +36,9 @@ import cn.nukkit.level.format.LevelProviderManager;
 import cn.nukkit.level.format.anvil.Anvil;
 import cn.nukkit.level.format.leveldb.LevelDB;
 import cn.nukkit.level.format.mcregion.McRegion;
+import cn.nukkit.level.format.river.FileLoader;
 import cn.nukkit.level.format.river.River;
+import cn.nukkit.level.format.river.RiverLevel;
 import cn.nukkit.level.generator.Flat;
 import cn.nukkit.level.generator.Generator;
 import cn.nukkit.level.generator.Nether;
@@ -1611,7 +1613,12 @@ public class Server {
 
         final Level level;
         try {
-            level = new Level(this, name, path, provider);
+            if (provider.equals(River.class)) {
+                final FileLoader fileLoader = new FileLoader(new File(path));
+                level = RiverLevel.deserialize(name, path, fileLoader.loadWorld(name, false));
+            } else {
+                level = new Level(this, name, path, provider);
+            }
         } catch (final Exception e) {
             Server.log.error(this.getLanguage().translateString("nukkit.level.loadError", new String[]{name, e.getMessage()}));
             return false;

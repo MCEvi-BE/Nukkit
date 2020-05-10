@@ -1,6 +1,5 @@
 package cn.nukkit.level.format.river;
 
-import cn.nukkit.level.Level;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.format.LevelProvider;
 import cn.nukkit.level.format.generic.BaseFullChunk;
@@ -12,7 +11,7 @@ import java.util.Map;
 
 public class River extends BaseLevelProvider {
 
-    public River(final Level level, final String path, final boolean f) throws IOException {
+    public River(final RiverLevel level, final String path, final boolean f) {
         super(level, path, f);
     }
 

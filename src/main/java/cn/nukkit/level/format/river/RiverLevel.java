@@ -1,6 +1,8 @@
 package cn.nukkit.level.format.river;
 
 import cn.nukkit.Player;
+import cn.nukkit.Server;
+import cn.nukkit.level.Level;
 import cn.nukkit.level.format.ChunkSection;
 import cn.nukkit.level.format.anvil.util.BlockStorage;
 import cn.nukkit.level.format.anvil.util.NibbleArray;
@@ -13,7 +15,7 @@ import java.io.*;
 import java.nio.ByteOrder;
 import java.util.*;
 
-public final class RiverWorld {
+public final class RiverLevel extends Level {
 
     public static final byte[] HEADER = {(byte) -79, (byte) 11};
 
@@ -29,13 +31,15 @@ public final class RiverWorld {
 
     private final List<CompoundTag> worldMaps;
 
-    public RiverWorld(final Map<Long, RiverChunk> chunks, final CompoundTag extraData, final List<CompoundTag> worldMaps) {
+    public RiverLevel(final String name, final String path, final Map<Long, RiverChunk> chunks,
+                      final CompoundTag extraData, final List<CompoundTag> worldMaps) {
+        super(Server.getInstance(), name, path, null);
         this.chunks = chunks;
         this.extraData = extraData;
         this.worldMaps = worldMaps;
     }
 
-    public static RiverWorld deserialize(final byte[] data) throws Exception {
+    public static RiverLevel deserialize(final String name, final String path, final byte[] data) throws Exception {
         final DataInputStream stream = new DataInputStream(new ByteArrayInputStream(data));
 
         //Head------------------------------------
@@ -114,7 +118,7 @@ public final class RiverWorld {
         //Decompress-------------------------------------
 
         //Chunk deserialization-------------------------------------
-        final Map<Long, RiverChunk> chunks = RiverWorld.readChunks(minX, minZ, width, depth, chunkBitset, chunkData);
+        final Map<Long, RiverChunk> chunks = RiverLevel.readChunks(minX, minZ, width, depth, chunkBitset, chunkData);
         //Chunk deserialization-------------------------------------
 
         //Entities
@@ -126,8 +130,8 @@ public final class RiverWorld {
             for (final CompoundTag tag : entitiesList.getAll()) {
                 final ListTag<DoubleTag> listTag = tag.getList("Pos", DoubleTag.class);
 
-                final int chunkX = RiverWorld.floor(listTag.get(0).getData()) >> 4;
-                final int chunkZ = RiverWorld.floor(listTag.get(2).getData()) >> 4;
+                final int chunkX = RiverLevel.floor(listTag.get(0).getData()) >> 4;
+                final int chunkZ = RiverLevel.floor(listTag.get(2).getData()) >> 4;
                 final long chunkKey = (long) chunkZ * Integer.MAX_VALUE + (long) chunkX;
                 final RiverChunk riverChunk = chunks.get(chunkKey);
 
@@ -176,7 +180,7 @@ public final class RiverWorld {
             mapList = mapsCompound.getList("maps", CompoundTag.class).getAll();
         }
 
-        return new RiverWorld(chunks, extraCompound, mapList);
+        return new RiverLevel(name, path, chunks, extraCompound, mapList);
     }
 
     private static Map<Long, RiverChunk> readChunks(final int minX, final int minZ, final int width, final int depth,
@@ -203,7 +207,7 @@ public final class RiverWorld {
                         biomeMap[i] = dataStream.readByte();
                     }
 
-                    final ChunkSection[] sections = RiverWorld.readChunkSections(dataStream);
+                    final ChunkSection[] sections = RiverLevel.readChunkSections(dataStream);
 
                     chunkMap.put(((long) minZ + z) * Integer.MAX_VALUE + (long) minX + x,
                         new RiverChunk(minX + x, minZ + z, sections, heightMap, biomeMap));
@@ -281,7 +285,7 @@ public final class RiverWorld {
             sectionBitmask.set(i, sections[i] != null);
         }
 
-        RiverWorld.writeBitSetAsBytes(stream, sectionBitmask, 2);
+        RiverLevel.writeBitSetAsBytes(stream, sectionBitmask, 2);
 
         for (final ChunkSection section : sections) {
 
@@ -326,7 +330,7 @@ public final class RiverWorld {
         final DataOutputStream outStream = new DataOutputStream(outByteStream);
 
         for (final RiverChunk riverChunk : chunks) {
-            RiverWorld.serializeChunk(riverChunk, outStream);
+            RiverLevel.serializeChunk(riverChunk, outStream);
         }
 
         return outByteStream.toByteArray();
@@ -342,8 +346,8 @@ public final class RiverWorld {
             || Arrays.stream(riverChunk.getSections()).allMatch(Objects::isNull)); // Remove empty chunks to save space
 
         //Head------------------------------------
-        outStream.writeByte(RiverWorld.MAGIC);
-        outStream.writeByte(RiverWorld.VERSION);
+        outStream.writeByte(RiverLevel.MAGIC);
+        outStream.writeByte(RiverLevel.VERSION);
         //Head------------------------------------
 
         //LowMax------------------------------------
@@ -372,11 +376,11 @@ public final class RiverWorld {
             chunkBitset.set(bitsetIndex, true);
         }
         final int chunkMaskSize = (int) Math.ceil((width * depth) / 8.0D);
-        RiverWorld.writeBitSetAsBytes(outStream, chunkBitset, chunkMaskSize);
+        RiverLevel.writeBitSetAsBytes(outStream, chunkBitset, chunkMaskSize);
         //BitSet------------------------------------
 
         //Chunks------------------------------------
-        final byte[] chunkData = RiverWorld.serializeChunks(riverChunks);
+        final byte[] chunkData = RiverLevel.serializeChunks(riverChunks);
         final byte[] compressedChunkData = Zstd.compress(chunkData);
         outStream.writeInt(compressedChunkData.length);
         outStream.writeInt(chunkData.length);
