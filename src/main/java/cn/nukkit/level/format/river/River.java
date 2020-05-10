@@ -54,11 +54,19 @@ public class River extends BaseLevelProvider {
                                 final Class<? extends Generator> generator, final Map<String, String> options)
         throws IOException {
         final File worldDir = new File(path);
-        if (!worldDir.exists()){
+        if (!worldDir.exists()) {
             worldDir.mkdirs();
         }
         final File slimeFile = new File(worldDir, name + ".slime");
         slimeFile.createNewFile();
+        final CompoundTag data = new CompoundTag("Data")
+            .putString("LevelName", name)
+            .putDouble("SpawnX", 0.0d)
+            .putDouble("SpawnY", 64.0d)
+            .putDouble("SpawnZ", 0.0d)
+            .putLong("Time", 0L)
+            .putLong("SizeOnDisk", 0L);
+        NBTIO.writeZSTDCompressed(data, new FileOutputStream(slimeFile), ByteOrder.BIG_ENDIAN);
     }
 
     @Override

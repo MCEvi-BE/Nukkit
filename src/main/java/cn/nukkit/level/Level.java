@@ -307,7 +307,7 @@ public class Level implements ChunkManager, Metadatable {
         final boolean isRiver = provider.equals(River.class) && this.getClass().equals(RiverLevel.class);
         try {
             if (isRiver) {
-                this.provider = provider.getConstructor(RiverLevel.class, String.class, boolean.class)
+                this.provider = provider.getConstructor(Level.class, String.class, boolean.class)
                     .newInstance(this, path, false);
             } else if (convert) {
                 final String newPath = new File(path).getParent() + "/" + name + ".old/";
@@ -319,7 +319,6 @@ public class Level implements ChunkManager, Metadatable {
         } catch (final Exception e) {
             throw new LevelException("Caused by " + Utils.getExceptionMessage(e));
         }
-
         this.timings = new LevelTimings(this);
 
         if (convert) {
