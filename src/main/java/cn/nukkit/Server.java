@@ -228,6 +228,8 @@ public class Server {
 
     private int networkZlibProvider = 0;
 
+    private String defaultLevelFormat = "";
+
     private boolean autoTickRate = true;
 
     private int autoTickRateLimit = 20;
@@ -402,6 +404,7 @@ public class Server {
         this.networkCompressionLevel = this.getConfig("network.compression-level", 7);
         this.networkCompressionAsync = this.getConfig("network.async-compression", true);
 
+        this.defaultLevelFormat = this.getConfig("level-settings.default-format", "river");
         this.autoTickRate = this.getConfig("level-settings.auto-tick-rate", true);
         this.autoTickRateLimit = this.getConfig("level-settings.auto-tick-rate-limit", 20);
         this.alwaysTickPlayers = this.getConfig("level-settings.always-tick-players", false);
@@ -1655,7 +1658,7 @@ public class Server {
         }
 
         if (provider == null) {
-            provider = LevelProviderManager.getProviderByName("river");
+            provider = LevelProviderManager.getProviderByName(this.defaultLevelFormat);
         }
 
         final String path;
