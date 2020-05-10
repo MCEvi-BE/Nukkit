@@ -1,5 +1,6 @@
 package cn.nukkit.level.format.river;
 
+import cn.nukkit.Server;
 import cn.nukkit.level.GameRules;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.format.FullChunk;
@@ -18,8 +19,9 @@ import java.util.Map;
 
 public class River extends BaseLevelProvider {
 
-    public River(final Level level, final String path, final boolean f) throws IOException {
-        super(level, path, f);
+    public River(final Server server, final Level level, final String path)
+        throws IOException, UnknownWorldException, WorldInUseException {
+        super(server, level, path);
     }
 
     public static String getProviderName() {

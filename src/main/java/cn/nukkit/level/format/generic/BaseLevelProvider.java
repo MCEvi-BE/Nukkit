@@ -5,6 +5,10 @@ import cn.nukkit.level.GameRules;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.format.LevelProvider;
+import cn.nukkit.level.format.river.FileLoader;
+import cn.nukkit.level.format.river.RiverLevel;
+import cn.nukkit.level.format.river.UnknownWorldException;
+import cn.nukkit.level.format.river.WorldInUseException;
 import cn.nukkit.level.generator.Generator;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.NBTIO;
@@ -46,7 +50,8 @@ public abstract class BaseLevelProvider implements LevelProvider {
 
     private Vector3 spawn;
 
-    public BaseLevelProvider(final Level level, final String path, final boolean f) throws IOException {
+    public BaseLevelProvider(final Server server, final Level level, final String path)
+        throws IOException, UnknownWorldException, WorldInUseException {
         this.level = level;
         this.path = path;
         final File worldDir = new File(this.getPath());
@@ -56,11 +61,14 @@ public abstract class BaseLevelProvider implements LevelProvider {
         }
         boolean init = false;
         for (final File file : files) {
-            final String name = file.getName();
-            if (name.endsWith(".slime") && !init) {
+            if (file.getName().endsWith(".slime") && !init) {
+                final String name = file.getName().replace(".slime", "");
                 // Slime dosyası
                 init = true;
-                final CompoundTag data = NBTIO.readZSTDCompressed(new FileInputStream(file), ByteOrder.BIG_ENDIAN);
+                final FileLoader loader = new FileLoader(worldDir);
+                final byte[] serialized = loader.loadWorld(name, true);
+                final RiverLevel riverLevel = RiverLevel.deserialize(server, name, path, serialized);
+                final CompoundTag data = riverLevel.getLevelData();
                 this.levelData = data;
                 this.spawn = new Vector3(
                     this.levelData.getDouble("SpawnX"),

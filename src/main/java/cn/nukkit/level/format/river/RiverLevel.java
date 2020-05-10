@@ -39,7 +39,7 @@ public final class RiverLevel extends Level {
         this.worldMaps = worldMaps;
     }
 
-    public static RiverLevel deserialize(final Server server, final String name, final String path, final byte[] data) throws Exception {
+    public static RiverLevel deserialize(final Server server, final String name, final String path, final byte[] data) throws IOException {
         final DataInputStream stream = new DataInputStream(new ByteArrayInputStream(data));
 
         //Head------------------------------------
@@ -136,7 +136,7 @@ public final class RiverLevel extends Level {
                 final RiverChunk riverChunk = chunks.get(chunkKey);
 
                 if (riverChunk == null) {
-                    throw new Exception("fuck entity");
+                    throw new RuntimeException("fuck entity");
                 }
 
                 riverChunk.getNBTentities().add(tag);
@@ -158,7 +158,7 @@ public final class RiverLevel extends Level {
                 final RiverChunk riverChunk = chunks.get(chunkKey);
 
                 if (riverChunk == null) {
-                    throw new Exception("fuck tile entity");
+                    throw new RuntimeException("fuck tile entity");
                 }
 
                 riverChunk.getNBTtiles().add(tileEntityCompound);
@@ -336,16 +336,13 @@ public final class RiverLevel extends Level {
         return outByteStream.toByteArray();
     }
 
-    public void addDefaultMap() {
-        this.worldMaps.removeIf(compoundTag -> "maps".equals(compoundTag.getName()));
-        final CompoundTag def = new CompoundTag("maps")
-            .putString("LevelName", getName())
-            .putDouble("SpawnX", 0.0d)
-            .putDouble("SpawnY", 64.0d)
-            .putDouble("SpawnZ", 0.0d)
-            .putLong("Time", 0L)
-            .putLong("SizeOnDisk", 0L);
-        this.worldMaps.add(def);
+    public CompoundTag getLevelData() {
+        for (final CompoundTag worldMap : this.worldMaps) {
+            if ("maps".equals(worldMap.getName())) {
+                return worldMap;
+            }
+        }
+        return null;
     }
 
     public byte[] serialize() throws Exception {
