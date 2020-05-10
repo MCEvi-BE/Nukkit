@@ -158,8 +158,6 @@ public class Server {
 
     private final Thread currentThread;
 
-    public int networkCompressionLevel = 7;
-
     private final BanList banByName;
 
     private final BanList banByIP;
@@ -170,23 +168,11 @@ public class Server {
 
     private final AtomicBoolean isRunning = new AtomicBoolean(true);
 
-    private boolean hasStopped = false;
-
     private final PluginManager pluginManager;
 
     private final int profilingTickrate = 20;
 
     private final ServerScheduler scheduler;
-
-    private int tickCounter;
-
-    private long nextTick;
-
-    private float maxTick = 20;
-
-    private float maxUse = 0;
-
-    private int sendUsageTicker = 0;
 
     private final boolean dispatchSignals = false;
 
@@ -198,12 +184,6 @@ public class Server {
 
     private final ConsoleCommandSender consoleSender;
 
-    private int maxPlayers;
-
-    private boolean autoSave = true;
-
-    private RCON rcon;
-
     private final EntityMetadataStore entityMetadata;
 
     private final PlayerMetadataStore playerMetadata;
@@ -211,6 +191,38 @@ public class Server {
     private final LevelMetadataStore levelMetadata;
 
     private final Network network;
+
+    private final BaseLang baseLang;
+
+    private final UUID serverID;
+
+    private final Config properties;
+
+    private final Config config;
+
+    private final boolean allowNether;
+
+    private final DB nameLookup;
+
+    public int networkCompressionLevel = 7;
+
+    private boolean hasStopped = false;
+
+    private int tickCounter;
+
+    private long nextTick;
+
+    private float maxTick = 20;
+
+    private float maxUse = 0;
+
+    private int sendUsageTicker = 0;
+
+    private int maxPlayers;
+
+    private boolean autoSave = true;
+
+    private RCON rcon;
 
     private boolean networkCompressionAsync = true;
 
@@ -234,29 +246,17 @@ public class Server {
 
     private int autoSaveTicks = 6000;
 
-    private final BaseLang baseLang;
-
     private boolean forceLanguage = false;
-
-    private final UUID serverID;
 
     private QueryHandler queryHandler;
 
     private QueryRegenerateEvent queryRegenerateEvent;
 
-    private final Config properties;
-
-    private final Config config;
-
     private Level[] levelArray = new Level[0];
 
     private Level defaultLevel = null;
 
-    private final boolean allowNether;
-
     private Watchdog watchdog;
-
-    private final DB nameLookup;
 
     private PlayerDataSerializer playerDataSerializer = new DefaultPlayerDataSerializer(this);
 
