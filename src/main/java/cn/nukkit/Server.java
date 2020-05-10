@@ -557,7 +557,9 @@ public class Server {
                 this.setPropertyString("level-name", defaultName);
             }
 
+            System.out.println("test1");
             if (!this.loadLevel(defaultName)) {
+                System.out.println("test2");
                 long seed;
                 final String seedString = String.valueOf(this.getProperty("level-seed", System.currentTimeMillis()));
                 try {
@@ -565,7 +567,9 @@ public class Server {
                 } catch (final NumberFormatException e) {
                     seed = seedString.hashCode();
                 }
+                System.out.println("test3");
                 this.generateLevel(defaultName, seed == 0 ? System.currentTimeMillis() : seed);
+                System.out.println("test4");
             }
 
             this.setDefaultLevel(this.getLevelByName(defaultName));
@@ -1645,22 +1649,24 @@ public class Server {
     }
 
     public boolean generateLevel(final String name, final long seed, Class<? extends Generator> generator, final Map<String, Object> options, Class<? extends LevelProvider> provider) {
+        System.out.println("test0");
         if (Objects.equals(name.trim(), "") || this.isLevelGenerated(name)) {
             return false;
         }
-
+        System.out.println("test1");
         if (!options.containsKey("preset")) {
             options.put("preset", this.getPropertyString("generator-settings", ""));
         }
 
+        System.out.println("test2");
         if (generator == null) {
             generator = Generator.getGenerator(this.getLevelType());
         }
-
+        System.out.println("test3");
         if (provider == null) {
             provider = LevelProviderManager.getProviderByName(this.defaultLevelFormat);
         }
-
+        System.out.println("test3");
         final String path;
 
         if (name.contains("/") || name.contains("\\")) {
@@ -1668,9 +1674,11 @@ public class Server {
         } else {
             path = this.getDataPath() + "worlds/" + name + "/";
         }
+        System.out.println("test4");
 
         final Level level;
         try {
+            System.out.println("test5");
             provider.getMethod("generate", String.class, String.class, long.class, Class.class, Map.class).invoke(null, path, name, seed, generator, options);
 
             level = new Level(this, name, path, provider);
