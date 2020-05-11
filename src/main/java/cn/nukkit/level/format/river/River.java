@@ -71,7 +71,6 @@ public class River extends BaseLevelProvider {
 
     @Override
     public AsyncTask requestChunkTask(final int x, final int z) {
-        System.out.println("chunk task " + x + " , " + z);
         final RiverChunk chunk = (RiverChunk) this.getChunk(x, z, false);
         if (chunk == null) {
             throw new ChunkException("Invalid Chunk Set");
@@ -81,20 +80,21 @@ public class River extends BaseLevelProvider {
 
         byte[] blockEntities = new byte[0];
 
-        if (!chunk.getBlockEntities().isEmpty()) {
-            final List<CompoundTag> tagList = new ArrayList<>();
+        final List<CompoundTag> tagList = new ArrayList<>();
 
-            for (final BlockEntity blockEntity : chunk.getBlockEntities().values()) {
-                if (blockEntity instanceof BlockEntitySpawnable) {
-                    tagList.add(((BlockEntitySpawnable) blockEntity).getSpawnCompound());
-                }
+        final Map<Long, BlockEntity> entities = chunk.getBlockEntities();
+        for (final BlockEntity blockEntity : entities.values()) {
+            if (blockEntity instanceof BlockEntitySpawnable) {
+                tagList.add(((BlockEntitySpawnable) blockEntity).getSpawnCompound());
             }
+        }
 
-            try {
-                blockEntities = NBTIO.write(tagList, ByteOrder.LITTLE_ENDIAN, true);
-            } catch (final IOException e) {
-                throw new RuntimeException(e);
+        try {
+            if (!tagList.isEmpty()) {
+                blockEntities = NBTIO.write(tagList, ByteOrder.BIG_ENDIAN, true);
             }
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
         }
 
         final Map<Integer, Integer> extra = chunk.getBlockExtraDataArray();
@@ -138,7 +138,7 @@ public class River extends BaseLevelProvider {
 
     @Override
     public BaseFullChunk getEmptyChunk(final int x, final int z) {
-        return new RiverChunk(this,x, z);
+        return new RiverChunk(this, x, z);
     }
 
     @Override
@@ -162,7 +162,7 @@ public class River extends BaseLevelProvider {
         final RiverChunk chunk = this.getLevel().getChunk(chunkX, chunkZ);
         final RiverChunk tmp;
         if (chunk == null) {
-            tmp = new RiverChunk(this,chunkX, chunkZ);
+            tmp = new RiverChunk(this, chunkX, chunkZ);
         } else {
             tmp = chunk;
         }
