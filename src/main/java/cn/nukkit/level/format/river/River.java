@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class River extends BaseLevelProvider {
+public final class River extends BaseLevelProvider {
 
     public River(final Level level, final String path, final boolean f) {
         super(level, path, true);
