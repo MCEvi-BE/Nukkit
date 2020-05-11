@@ -2017,9 +2017,13 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             return;
         }
 
-        Level level = this.server.getLevelByName(this.namedTag.getString("SpawnLevel"));
+        final String spawnLevel = this.namedTag.getString("SpawnLevel");
+        Level level = this.server.getLevelByName(spawnLevel);
         if(level != null){
-            this.spawnPosition = new Position(this.namedTag.getInt("SpawnX"), this.namedTag.getInt("SpawnY"), this.namedTag.getInt("SpawnZ"), level);
+            final int spawnX = this.namedTag.getInt("SpawnX");
+            final int spawnY = this.namedTag.getInt("SpawnY");
+            final int spawnZ = this.namedTag.getInt("SpawnZ");
+            this.spawnPosition = new Position(spawnX, spawnY, spawnZ, level);
         }else{
             this.spawnPosition = this.level.getSafeSpawn();
         }
