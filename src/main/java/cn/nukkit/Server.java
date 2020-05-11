@@ -1,6 +1,7 @@
 package cn.nukkit;
 
 import cn.nukkit.block.Block;
+import cn.nukkit.block.BlockID;
 import cn.nukkit.blockentity.*;
 import cn.nukkit.command.*;
 import cn.nukkit.console.NukkitConsole;
@@ -1696,6 +1697,7 @@ public class Server {
                 final RiverLevel riverLevel = new RiverLevel(this, name, path, new HashMap<>(),
                     new CompoundTag(""), data);
                 final River riverprovider = (River) riverLevel.getProvider();
+                riverLevel.setBlock(0, 60, 0, Block.get(BlockID.BEDROCK), true, false);
                 riverprovider.setLevelData(data);
                 riverprovider.setSpawn(spawn);
                 riverLevel.prepareLevel(River.class);

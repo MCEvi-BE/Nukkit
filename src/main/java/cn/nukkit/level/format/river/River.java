@@ -69,6 +69,12 @@ public final class River extends BaseLevelProvider {
         slimeFile.createNewFile();
     }
 
+    public static RiverChunkSection createChunkSection(final int y) {
+        final RiverChunkSection cs = new RiverChunkSection(y);
+        cs.hasSkyLight = true;
+        return cs;
+    }
+
     @Override
     public AsyncTask requestChunkTask(final int x, final int z) {
         final RiverChunk chunk = (RiverChunk) this.getChunk(x, z, false);
