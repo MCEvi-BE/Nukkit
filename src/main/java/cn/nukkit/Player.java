@@ -159,8 +159,6 @@ public class Player extends EntityHuman implements CommandSender, ChunkLoader, I
 
     private final AtomicReference<Locale> locale = new AtomicReference<>(null);
 
-    private final int loaderId;
-
     public boolean playedBefore;
 
     public boolean spawned = false;
@@ -264,6 +262,8 @@ public class Player extends EntityHuman implements CommandSender, ChunkLoader, I
     private BlockVector3 lastBreakPosition = new BlockVector3();
 
     private String clientSecret;
+
+    private final int loaderId;
 
     private PermissibleBase perm = null;
 
@@ -2943,7 +2943,7 @@ public class Player extends EntityHuman implements CommandSender, ChunkLoader, I
             throw new IllegalStateException("Tried to save closed player");
         }
 
-        this.saveNBT();
+        saveNBT();
 
         if (this.level != null) {
             this.namedTag.putString("Level", this.level.getFolderName());
@@ -4879,7 +4879,7 @@ public class Player extends EntityHuman implements CommandSender, ChunkLoader, I
 
         final ListTag<DoubleTag> posList = nbt.getList("Pos", DoubleTag.class);
 
-        this.init(this.level.getChunk((int) posList.get(0).data >> 4, (int) posList.get(2).data >> 4, true), nbt);
+        init(this.level.getChunk((int) posList.get(0).data >> 4, (int) posList.get(2).data >> 4, true), nbt);
 
         if (!this.namedTag.contains("foodLevel")) {
             this.namedTag.putInt("foodLevel", 20);
