@@ -3,8 +3,6 @@ package cn.nukkit.level.format.river;
 import cn.nukkit.block.Block;
 import cn.nukkit.level.format.ChunkSection;
 import cn.nukkit.level.format.LevelProvider;
-import cn.nukkit.level.format.anvil.Anvil;
-import cn.nukkit.level.format.anvil.Chunk;
 import cn.nukkit.level.format.generic.BaseChunk;
 import cn.nukkit.level.format.generic.EmptyChunkSection;
 import java.util.ArrayList;
@@ -17,14 +15,14 @@ import java.util.HashMap;
  */
 public class RiverChunk extends BaseChunk {
 
-    public RiverChunk(LevelProvider provider, final int x, final int z) {
+    public RiverChunk(final LevelProvider provider, final int x, final int z) {
         this.provider = provider;
-        this.setPosition(x,z);
+        this.setPosition(x, z);
         this.heightMap = new byte[256];
         this.biomes = new byte[256];
         Arrays.fill(this.heightMap, (byte) 255);
         this.extraData = new HashMap<>();
-        this.sections = new ChunkSection[16];
+        this.sections = new RiverChunkSection[16];
         System.arraycopy(EmptyChunkSection.EMPTY, 0, this.sections, 0, 16);
         this.NBTentities = null;
         this.NBTtiles = null;
@@ -38,6 +36,23 @@ public class RiverChunk extends BaseChunk {
         this.sections = sections;
         this.NBTentities = new ArrayList<>();
         this.NBTtiles = new ArrayList<>();
+    }
+
+    public static RiverChunk getEmptyChunk(final int chunkX, final int chunkZ) {
+        return RiverChunk.getEmptyChunk(chunkX, chunkZ, null);
+    }
+
+    public static RiverChunk getEmptyChunk(final int chunkX, final int chunkZ, final LevelProvider provider) {
+        try {
+            final RiverChunk chunk = new RiverChunk(provider, chunkX, chunkZ);
+            chunk.setPosition(chunkX, chunkZ);
+
+            chunk.heightMap = new byte[256];
+//            chunk.lightPopulated = false;
+            return chunk;
+        } catch (final Exception e) {
+            return null;
+        }
     }
 
     @Override
@@ -139,24 +154,6 @@ public class RiverChunk extends BaseChunk {
             }
         }
         return result;
-    }
-
-
-    public static RiverChunk getEmptyChunk(int chunkX, int chunkZ) {
-        return getEmptyChunk(chunkX, chunkZ, null);
-    }
-
-    public static RiverChunk getEmptyChunk(int chunkX, int chunkZ, LevelProvider provider) {
-        try {
-            RiverChunk chunk = new RiverChunk(provider, chunkX,chunkZ);
-            chunk.setPosition(chunkX, chunkZ);
-
-            chunk.heightMap = new byte[256];
-//            chunk.lightPopulated = false;
-            return chunk;
-        } catch (Exception e) {
-            return null;
-        }
     }
 
 }
