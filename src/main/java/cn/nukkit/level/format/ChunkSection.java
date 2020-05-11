@@ -8,6 +8,7 @@ import cn.nukkit.utils.BinaryStream;
  * Nukkit Project
  */
 public interface ChunkSection {
+
     int getY();
 
     int getBlockId(int x, int y, int z);
@@ -46,7 +47,6 @@ public interface ChunkSection {
 
     boolean isEmpty();
 
-
     boolean hasBlockLight();
 
     boolean hasSkyLight();
@@ -54,4 +54,5 @@ public interface ChunkSection {
     void writeTo(BinaryStream stream);
 
     ChunkSection copy();
+
 }
