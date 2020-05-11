@@ -33,7 +33,7 @@ public class RiverChunkSection implements ChunkSection {
 
     protected boolean hasSkyLight;
 
-    public RiverChunkSection(final int y, byte[] blocks, byte[] dats, final byte[] blockLight, final byte[] skyLight, final byte[] compressedLight,
+    public RiverChunkSection(final int y, final byte[] blocks, final byte[] dats, final byte[] blockLight, final byte[] skyLight, final byte[] compressedLight,
                              final boolean hasBlockLight, final boolean hasSkyLight) {
         this.y = y;
         this.blockLight = blockLight;
@@ -41,11 +41,8 @@ public class RiverChunkSection implements ChunkSection {
         this.compressedLight = compressedLight;
         this.hasBlockLight = hasBlockLight;
         this.hasSkyLight = hasSkyLight;
-
-        NibbleArray data = new NibbleArray(dats);
-
+        final NibbleArray data = new NibbleArray(dats);
         this.storage = new BlockStorage();
-
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
                 for (int yy = 0; yy < 16; yy++) {
@@ -60,23 +57,16 @@ public class RiverChunkSection implements ChunkSection {
 
     public RiverChunkSection(final int y) {
         this.y = y;
-
         this.hasBlockLight = false;
         this.hasSkyLight = false;
-
         this.storage = new BlockStorage();
-
-
     }
 
     public RiverChunkSection(final CompoundTag nbt) {
         this.y = nbt.getByte("Y");
-
         final byte[] blocks = nbt.getByteArray("Blocks");
         final NibbleArray data = new NibbleArray(nbt.getByteArray("Data"));
-
         this.storage = new BlockStorage();
-
         // Convert YZX to XZY
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
@@ -87,7 +77,6 @@ public class RiverChunkSection implements ChunkSection {
                 }
             }
         }
-
         this.blockLight = nbt.getByteArray("BlockLight");
         this.skyLight = nbt.getByteArray("SkyLight");
     }
