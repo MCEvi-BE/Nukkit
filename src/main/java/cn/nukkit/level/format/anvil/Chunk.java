@@ -57,7 +57,7 @@ public class Chunk extends BaseChunk {
 
         if (nbt == null) {
             // boş sectionları doldur.
-            this.biomes = new byte[16 * 16];
+            this.biomes = new byte[(16 << 4)];
             this.sections = new cn.nukkit.level.format.ChunkSection[16];
             System.arraycopy(EmptyChunkSection.EMPTY, 0, this.sections, 0, 16);
             return;

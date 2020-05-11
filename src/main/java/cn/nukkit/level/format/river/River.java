@@ -161,11 +161,13 @@ public final class River extends BaseLevelProvider {
     public BaseFullChunk loadChunk(final long index, final int chunkX, final int chunkZ, final boolean create) {
         final RiverChunk chunk = this.getLevel().getChunk(chunkX, chunkZ);
         final RiverChunk tmp;
+        this.level.timings.syncChunkLoadDataTimer.startTiming();
         if (chunk == null) {
             tmp = new RiverChunk(this, chunkX, chunkZ);
         } else {
             tmp = chunk;
         }
+        this.level.timings.syncChunkLoadDataTimer.stopTiming();
         return tmp;
     }
 

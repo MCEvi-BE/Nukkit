@@ -22,8 +22,12 @@ public class RiverChunk extends BaseChunk {
         this.biomes = new byte[256];
         Arrays.fill(this.heightMap, (byte) 255);
         this.extraData = new HashMap<>();
-        this.sections = new RiverChunkSection[16];
-        System.arraycopy(EmptyChunkSection.EMPTY, 0, this.sections, 0, 16);
+        this.sections = new ChunkSection[16];
+        try {
+            System.arraycopy(EmptyChunkSection.EMPTY, 0, this.sections, 0, 16);
+        } catch (final Throwable e) {
+            e.printStackTrace();
+        }
         this.NBTentities = null;
         this.NBTtiles = null;
     }
