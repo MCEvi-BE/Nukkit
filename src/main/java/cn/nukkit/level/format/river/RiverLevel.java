@@ -4,8 +4,6 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.format.ChunkSection;
-import cn.nukkit.level.format.anvil.util.BlockStorage;
-import cn.nukkit.level.format.anvil.util.NibbleArray;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
@@ -30,14 +28,14 @@ public final class RiverLevel extends Level {
 
     private final CompoundTag extraData;
 
-    private final List<CompoundTag> worldMaps;
+    private final CompoundTag worldMap;
 
     public RiverLevel(final Server server, final String name, final String path, final Map<Long, RiverChunk> chunks,
-                      final CompoundTag extraData, final List<CompoundTag> worldMaps) {
+                      final CompoundTag extraData, final CompoundTag worldMap) {
         super(server, name, path, River.class);
         this.chunks = chunks;
         this.extraData = extraData;
-        this.worldMaps = worldMaps;
+        this.worldMap = worldMap;
     }
 
     public static RiverLevel deserialize(final Server server, final String name, final String path, final byte[] data)
@@ -175,9 +173,8 @@ public final class RiverLevel extends Level {
 
         // World Maps
         final CompoundTag mapsCompound = NBTIO.read(mapsTag, ByteOrder.BIG_ENDIAN);
-        final List<CompoundTag> mapList = mapsCompound.getList("maps", CompoundTag.class).getAll();
 
-        final RiverLevel riverLevel = new RiverLevel(server, name, path, chunks, extraCompound, mapList);
+        final RiverLevel riverLevel = new RiverLevel(server, name, path, chunks, extraCompound, mapsCompound);
         final River river = (River) riverLevel.getProvider();
         river.setLevelData(mapsCompound);
         river.setSpawn(new Vector3(
@@ -186,6 +183,54 @@ public final class RiverLevel extends Level {
             mapsCompound.getInt("SpawnZ")
         ));
         return riverLevel;
+    }
+
+    public static void serializeChunk(final RiverChunk riverChunk, final DataOutputStream stream) throws IOException {
+        final byte[] heightMap = riverChunk.getHeightMapArray();
+        for (int i = 0; i < 256; i++) {
+            stream.writeByte(heightMap[i]);
+        }
+
+        final byte[] biomeMap = riverChunk.getBiomeIdArray();
+        stream.writeInt(biomeMap.length);
+
+        for (final byte r : biomeMap) {
+            stream.writeByte(r);
+        }
+
+        final ChunkSection[] sections = riverChunk.getSections();
+        final BitSet sectionBitmask = new BitSet(16);
+
+        for (int i = 0; i < sections.length; i++) {
+            sectionBitmask.set(i, sections[i] != null);
+        }
+
+        RiverLevel.writeBitSetAsBytes(stream, sectionBitmask, 2);
+
+        for (final ChunkSection section : sections) {
+
+            if (section == null) {
+                continue;
+            }
+
+            final boolean hasBlockLight = section.hasBlockLight();
+            if (hasBlockLight) {
+                stream.write(section.getLightArray());
+            }
+
+            final byte[] ids = section.getIdArray();
+            stream.write(ids);
+
+            final byte[] data = section.getDataArray();
+            stream.write(data);
+
+            final boolean hasSkyLight = section.hasSkyLight();
+            if (hasSkyLight) {
+                stream.write(section.getSkyLightArray());
+            }
+
+        }
+
     }
 
     private static Map<Long, RiverChunk> readChunks(final int minX, final int minZ, final int width, final int depth,
@@ -254,7 +299,7 @@ public final class RiverLevel extends Level {
                     dataStream.read(skyLight);
                 }
 
-                chunkSectionArray[i] = new RiverChunkSection(i, blockArray,dataArray, blockLight, skyLight, null, hasBlockLight, hasSkyLight);
+                chunkSectionArray[i] = new RiverChunkSection(i, blockArray, dataArray, blockLight, skyLight, null, hasBlockLight, hasSkyLight);
             }
         }
 
@@ -267,54 +312,6 @@ public final class RiverLevel extends Level {
             return floor;
         }
         return floor - (int) (Double.doubleToRawLongBits(num) >>> 63);
-    }
-
-    public static void serializeChunk(final RiverChunk riverChunk, final DataOutputStream stream) throws IOException {
-        final byte[] heightMap = riverChunk.getHeightMapArray();
-        for (int i = 0; i < 256; i++) {
-            stream.writeByte(heightMap[i]);
-        }
-
-        final byte[] biomeMap = riverChunk.getBiomeIdArray();
-        stream.writeInt(biomeMap.length);
-
-        for (final byte r : biomeMap) {
-            stream.writeByte(r);
-        }
-
-        final ChunkSection[] sections = riverChunk.getSections();
-        final BitSet sectionBitmask = new BitSet(16);
-
-        for (int i = 0; i < sections.length; i++) {
-            sectionBitmask.set(i, sections[i] != null);
-        }
-
-        RiverLevel.writeBitSetAsBytes(stream, sectionBitmask, 2);
-
-        for (final ChunkSection section : sections) {
-
-            if (section == null) {
-                continue;
-            }
-
-            final boolean hasBlockLight = section.hasBlockLight();
-            if (hasBlockLight) {
-                stream.write(section.getLightArray());
-            }
-
-            final byte[] ids = section.getIdArray();
-            stream.write(ids);
-
-            final byte[] data = section.getDataArray();
-            stream.write(data);
-
-            final boolean hasSkyLight = section.hasSkyLight();
-            if (hasSkyLight) {
-                stream.write(section.getSkyLightArray());
-            }
-
-        }
-
     }
 
     private static void writeBitSetAsBytes(final DataOutputStream outStream, final BitSet set, final int fixedSize)
@@ -341,12 +338,7 @@ public final class RiverLevel extends Level {
     }
 
     public CompoundTag getLevelData() {
-        for (final CompoundTag worldMap : this.worldMaps) {
-            if ("maps".equals(worldMap.getName())) {
-                return worldMap;
-            }
-        }
-        return null;
+        return this.worldMap;
     }
 
     public byte[] serialize() throws Exception {
@@ -449,13 +441,7 @@ public final class RiverLevel extends Level {
 
         //LevelDat-------------------------------------
 
-        final ListTag<CompoundTag> mapList = new ListTag<>("maps");
-        mapList.setAll(this.worldMaps);
-
-        final CompoundTag mapsCompound = new CompoundTag("");
-        mapsCompound.putList(mapList);
-
-        final byte[] mapArray = NBTIO.write(mapsCompound, ByteOrder.BIG_ENDIAN);
+        final byte[] mapArray = NBTIO.write(this.worldMap, ByteOrder.BIG_ENDIAN);
         final byte[] compressedMapArray = Zstd.compress(mapArray);
 
         outStream.writeInt(compressedMapArray.length);
@@ -485,10 +471,6 @@ public final class RiverLevel extends Level {
     @Override
     public Map<Long, RiverChunk> getChunks() {
         return this.chunks;
-    }
-
-    public List<CompoundTag> getWorldMaps() {
-        return this.worldMaps;
     }
 
     public CompoundTag getExtraData() {

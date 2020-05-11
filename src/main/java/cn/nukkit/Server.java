@@ -1685,7 +1685,6 @@ public class Server {
 
             if (provider.equals(River.class)) {
                 final FileLoader loader = new FileLoader(new File(path));
-                final List<CompoundTag> maps = new ArrayList<>();
                 final CompoundTag data = new CompoundTag("maps")
                     .putString("LevelName", name)
                     .putInt("SpawnX", 0)
@@ -1694,9 +1693,8 @@ public class Server {
                     .putLong("Time", 0L)
                     .putLong("SizeOnDisk", 0L);
                 final Vector3 spawn = new Vector3(0.0d, 64.0d, 0.0d);
-                maps.add(data);
                 final RiverLevel riverLevel = new RiverLevel(this, name, path, new HashMap<>(),
-                    new CompoundTag(""), maps);
+                    new CompoundTag(""), data);
                 final River riverprovider = (River) riverLevel.getProvider();
                 riverprovider.setLevelData(data);
                 riverprovider.setSpawn(spawn);
