@@ -254,8 +254,7 @@ public final class RiverLevel extends Level {
                     dataStream.read(skyLight);
                 }
 
-                chunkSectionArray[i] = new RiverChunkSection(i, new BlockStorage(blockArray, new NibbleArray(dataArray)), blockLight, skyLight, null, hasBlockLight, hasSkyLight);
-
+                chunkSectionArray[i] = new RiverChunkSection(i, blockArray,dataArray, blockLight, skyLight, null, hasBlockLight, hasSkyLight);
             }
         }
 

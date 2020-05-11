@@ -7,7 +7,6 @@ import cn.nukkit.level.Level;
 import cn.nukkit.level.format.ChunkSection;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.format.LevelProvider;
-import cn.nukkit.level.format.anvil.Chunk;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.level.format.generic.BaseLevelProvider;
 import cn.nukkit.level.generator.Generator;
@@ -72,7 +71,8 @@ public class River extends BaseLevelProvider {
 
     @Override
     public AsyncTask requestChunkTask(final int x, final int z) {
-        final Chunk chunk = (Chunk) this.getChunk(x, z, false);
+        System.out.println("chunk task " + x + " , " + z);
+        final RiverChunk chunk = (RiverChunk) this.getChunk(x, z, false);
         if (chunk == null) {
             throw new ChunkException("Invalid Chunk Set");
         }
@@ -138,7 +138,7 @@ public class River extends BaseLevelProvider {
 
     @Override
     public BaseFullChunk getEmptyChunk(final int x, final int z) {
-        return new RiverChunk(x, z);
+        return new RiverChunk(this,x, z);
     }
 
     @Override
@@ -162,8 +162,7 @@ public class River extends BaseLevelProvider {
         final RiverChunk chunk = this.getLevel().getChunk(chunkX, chunkZ);
         final RiverChunk tmp;
         if (chunk == null) {
-            tmp = new RiverChunk(chunkX, chunkZ);
-            tmp.setProvider(this.getLevel().getProvider());
+            tmp = new RiverChunk(this,chunkX, chunkZ);
         } else {
             tmp = chunk;
         }

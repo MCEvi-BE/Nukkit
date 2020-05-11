@@ -33,15 +33,29 @@ public class RiverChunkSection implements ChunkSection {
 
     protected boolean hasSkyLight;
 
-    public RiverChunkSection(final int y, final BlockStorage storage, final byte[] blockLight, final byte[] skyLight, final byte[] compressedLight,
+    public RiverChunkSection(final int y, byte[] blocks, byte[] dats, final byte[] blockLight, final byte[] skyLight, final byte[] compressedLight,
                              final boolean hasBlockLight, final boolean hasSkyLight) {
         this.y = y;
-        this.storage = storage;
         this.blockLight = blockLight;
         this.skyLight = skyLight;
         this.compressedLight = compressedLight;
         this.hasBlockLight = hasBlockLight;
         this.hasSkyLight = hasSkyLight;
+
+        NibbleArray data = new NibbleArray(dats);
+
+        this.storage = new BlockStorage();
+
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+                for (int yy = 0; yy < 16; yy++) {
+                    final int index = RiverChunkSection.getAnvilIndex(x, yy, z);
+                    this.storage.setBlockId(x, yy, z, blocks[index]);
+                    this.storage.setBlockData(x, yy, z, data.get(index));
+                }
+            }
+        }
+
     }
 
     public RiverChunkSection(final int y) {
@@ -51,6 +65,8 @@ public class RiverChunkSection implements ChunkSection {
         this.hasSkyLight = false;
 
         this.storage = new BlockStorage();
+
+
     }
 
     public RiverChunkSection(final CompoundTag nbt) {
@@ -315,7 +331,8 @@ public class RiverChunkSection implements ChunkSection {
     public RiverChunkSection copy() {
         return new RiverChunkSection(
             this.y,
-            this.storage.copy(),
+            this.storage.getBlockIds(),
+            this.storage.getBlockData(),
             this.blockLight == null ? null : this.blockLight.clone(),
             this.skyLight == null ? null : this.skyLight.clone(),
             this.compressedLight == null ? null : this.compressedLight.clone(),

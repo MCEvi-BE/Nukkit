@@ -2,10 +2,14 @@ package cn.nukkit.level.format.river;
 
 import cn.nukkit.block.Block;
 import cn.nukkit.level.format.ChunkSection;
+import cn.nukkit.level.format.LevelProvider;
+import cn.nukkit.level.format.anvil.Anvil;
+import cn.nukkit.level.format.anvil.Chunk;
 import cn.nukkit.level.format.generic.BaseChunk;
 import cn.nukkit.level.format.generic.EmptyChunkSection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * author: MagicDroidX
@@ -13,14 +17,17 @@ import java.util.Arrays;
  */
 public class RiverChunk extends BaseChunk {
 
-    public RiverChunk(final int x, final int z) {
-        this.x = x;
-        this.z = z;
+    public RiverChunk(LevelProvider provider, final int x, final int z) {
+        this.provider = provider;
+        this.setPosition(x,z);
         this.heightMap = new byte[256];
         this.biomes = new byte[256];
         Arrays.fill(this.heightMap, (byte) 255);
+        this.extraData = new HashMap<>();
         this.sections = new ChunkSection[16];
         System.arraycopy(EmptyChunkSection.EMPTY, 0, this.sections, 0, 16);
+        this.NBTentities = null;
+        this.NBTtiles = null;
     }
 
     public RiverChunk(final int x, final int z, final ChunkSection[] sections, final byte[] heightMap, final byte[] biomes) {
@@ -132,6 +139,24 @@ public class RiverChunk extends BaseChunk {
             }
         }
         return result;
+    }
+
+
+    public static RiverChunk getEmptyChunk(int chunkX, int chunkZ) {
+        return getEmptyChunk(chunkX, chunkZ, null);
+    }
+
+    public static RiverChunk getEmptyChunk(int chunkX, int chunkZ, LevelProvider provider) {
+        try {
+            RiverChunk chunk = new RiverChunk(provider, chunkX,chunkZ);
+            chunk.setPosition(chunkX, chunkZ);
+
+            chunk.heightMap = new byte[256];
+//            chunk.lightPopulated = false;
+            return chunk;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
 }

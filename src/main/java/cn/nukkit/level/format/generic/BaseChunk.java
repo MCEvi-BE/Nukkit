@@ -25,13 +25,8 @@ public abstract class BaseChunk extends BaseFullChunk implements Chunk {
     protected ChunkSection[] sections;
 
 
-    public BaseChunk() {
-    }
+    public BaseChunk() { }
 
-    public BaseChunk(int x, int z, byte[] biomes, byte[] blocks, byte[] data, byte[] skyLight, byte[] blockLight, byte[] heightMap, List<CompoundTag> NBTtiles, List<CompoundTag> NBTentities, ChunkSection[] sections) {
-        super(x, z, biomes, blocks, data, skyLight, blockLight, heightMap, NBTtiles, NBTentities);
-        this.sections = sections;
-    }
 
     @Override
     public BaseChunk clone() {
