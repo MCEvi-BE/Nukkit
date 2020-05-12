@@ -51,7 +51,7 @@ public final class Void extends Generator {
             }
         }
         if (0 >= chunkX << 4 && 0 < chunkX + 1 << 4 && 0 >= chunkZ << 4 && 0 < chunkZ + 1 << 4) {
-            chunk.setBlock(0, 63, 0, BlockID.BEDROCK);
+            chunk.setBlock(0, 60, 0, BlockID.BEDROCK);
         }
     }
 
