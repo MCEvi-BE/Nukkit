@@ -1699,6 +1699,7 @@ public class Server {
                 final River riverprovider = (River) riverLevel.getProvider();
                 riverprovider.setLevelData(data);
                 riverprovider.setSpawn(spawn);
+                riverLevel.setBlockAt(0, 60, 0, BlockID.BED_BLOCK);
                 riverLevel.prepareLevel(River.class);
                 level = riverLevel;
                 final byte[] serialized = riverLevel.serialize();

@@ -13,7 +13,11 @@ import java.util.HashMap;
  * author: MagicDroidX
  * Nukkit Project
  */
-public class RiverChunk extends BaseChunk {
+public final class RiverChunk extends BaseChunk {
+
+    protected boolean terrainPopulated;
+
+    protected boolean terrainGenerated;
 
     public RiverChunk(final LevelProvider provider, final int x, final int z) {
         this.provider = provider;
@@ -109,7 +113,7 @@ public class RiverChunk extends BaseChunk {
 
     @Override
     public boolean isPopulated() {
-        return true;
+        return this.terrainPopulated;
     }
 
     @Override
@@ -119,12 +123,15 @@ public class RiverChunk extends BaseChunk {
 
     @Override
     public void setPopulated(final boolean value) {
-
+        if (value != this.terrainPopulated) {
+            this.terrainPopulated = value;
+            this.setChanged();
+        }
     }
 
     @Override
     public boolean isGenerated() {
-        return true;
+        return this.terrainGenerated || this.terrainPopulated;
     }
 
     @Override
@@ -134,7 +141,10 @@ public class RiverChunk extends BaseChunk {
 
     @Override
     public void setGenerated(final boolean value) {
-
+        if (this.terrainGenerated != value) {
+            this.terrainGenerated = value;
+            this.setChanged();
+        }
     }
 
     @Override
