@@ -14,6 +14,8 @@ public final class Void extends Generator {
 
     private ChunkManager level;
 
+    private boolean init = false;
+
     public Void(final Map<String, Object> options) {
         this.options = options;
     }
@@ -31,6 +33,10 @@ public final class Void extends Generator {
     @Override
     public void generateChunk(final int chunkX, final int chunkZ) {
         final BaseFullChunk chunk = this.level.getChunk(chunkX, chunkZ);
+        if (!this.init) {
+            this.init = true;
+            chunk.setBlock(0, 60, 0, BlockID.BEDROCK);
+        }
         chunk.setGenerated(true);
         for (int Z = 0; Z < 16; ++Z) {
             for (int X = 0; X < 16; ++X) {
