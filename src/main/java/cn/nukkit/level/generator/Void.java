@@ -37,15 +37,18 @@ public final class Void extends Generator {
 
     @Override
     public void generateChunk(final int chunkX, final int chunkZ) {
+        if (chunkX < 0 || chunkZ < 0) {
+            return;
+        }
         final BaseFullChunk chunk = this.level.getChunk(chunkX, chunkZ);
+        chunk.setGenerated(true);
         if (this.lvl != null && !Void.loadedLevels.contains(this.lvl)) {
             Void.loadedLevels.add(this.lvl);
             chunk.setBlock(0, 60, 0, BlockID.BEDROCK);
         }
-        chunk.setGenerated(true);
         for (int Z = 0; Z < 16; ++Z) {
             for (int X = 0; X < 16; ++X) {
-                for (int y = 0; y < 256; ++y) {
+                for (int y = 0; y < 256 && y != 60; ++y) {
                     chunk.setBlock(X, y, Z, BlockID.AIR);
                 }
             }
