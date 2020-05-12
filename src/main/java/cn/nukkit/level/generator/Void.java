@@ -1,5 +1,6 @@
 package cn.nukkit.level.generator;
 
+import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockID;
 import cn.nukkit.level.ChunkManager;
 import cn.nukkit.level.Level;
@@ -49,9 +50,8 @@ public final class Void extends Generator {
                 }
             }
         }
-        if (this.lvl != null && !Void.loadedLevels.contains(this.lvl)) {
-            Void.loadedLevels.add(this.lvl);
-            chunk.setBlock(0, 60, 0, BlockID.BEDROCK);
+        if (0 >= chunkX << 4 && 0 < chunkX + 1 << 4 && 0 >= chunkZ << 4 && 0 < chunkZ + 1 << 4) {
+            chunk.setBlock(0, 63, 0, BlockID.BEDROCK);
         }
     }
 
