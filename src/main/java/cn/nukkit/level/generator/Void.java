@@ -5,16 +5,18 @@ import cn.nukkit.level.ChunkManager;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.math.Vector3;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public final class Void extends Generator {
 
+    private static final List<ChunkManager> loadedLevels = new ArrayList<>();
+
     private final Map<String, Object> options;
 
     private ChunkManager level;
-
-    private boolean init = false;
 
     public Void(final Map<String, Object> options) {
         this.options = options;
@@ -33,8 +35,8 @@ public final class Void extends Generator {
     @Override
     public void generateChunk(final int chunkX, final int chunkZ) {
         final BaseFullChunk chunk = this.level.getChunk(chunkX, chunkZ);
-        if (!this.init) {
-            this.init = true;
+        if (!Void.loadedLevels.contains(this.level)) {
+            Void.loadedLevels.add(this.level);
             chunk.setBlock(0, 60, 0, BlockID.BEDROCK);
         }
         chunk.setGenerated(true);
