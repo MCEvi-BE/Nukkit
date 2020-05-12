@@ -42,16 +42,16 @@ public final class Void extends Generator {
         }
         final BaseFullChunk chunk = this.level.getChunk(chunkX, chunkZ);
         chunk.setGenerated(true);
-        if (this.lvl != null && !Void.loadedLevels.contains(this.lvl)) {
-            Void.loadedLevels.add(this.lvl);
-            chunk.setBlock(0, 60, 0, BlockID.BEDROCK);
-        }
         for (int Z = 0; Z < 16; ++Z) {
             for (int X = 0; X < 16; ++X) {
-                for (int y = 0; y < 256 && y != 60; ++y) {
+                for (int y = 0; y < 256; ++y) {
                     chunk.setBlock(X, y, Z, BlockID.AIR);
                 }
             }
+        }
+        if (this.lvl != null && !Void.loadedLevels.contains(this.lvl)) {
+            Void.loadedLevels.add(this.lvl);
+            chunk.setBlock(0, 60, 0, BlockID.BEDROCK);
         }
     }
 
