@@ -37,6 +37,7 @@ import cn.nukkit.level.format.river.River;
 import cn.nukkit.level.format.river.RiverLevel;
 import cn.nukkit.level.generator.Generator;
 import cn.nukkit.level.generator.PopChunkManager;
+import cn.nukkit.level.generator.Void;
 import cn.nukkit.level.generator.task.GenerationTask;
 import cn.nukkit.level.generator.task.LightPopulationTask;
 import cn.nukkit.level.generator.task.PopulationTask;
@@ -220,7 +221,11 @@ public class Level implements ChunkManager, Metadatable {
                 if (Server.getInstance().isPrimaryThread()) {
                     generator.init(Level.this, rand);
                 }
-                generator.init(new PopChunkManager(Level.this.getSeed()), rand);
+                if (generator instanceof Void) {
+                    ((Void) generator).init(new PopChunkManager(Level.this.getSeed()), rand, Level.this);
+                } else {
+                    generator.init(new PopChunkManager(Level.this.getSeed()), rand);
+                }
                 return generator;
             } catch (final Throwable e) {
                 e.printStackTrace();
