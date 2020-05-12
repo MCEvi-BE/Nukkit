@@ -1,5 +1,6 @@
 package cn.nukkit.level.generator;
 
+import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockID;
 import cn.nukkit.level.ChunkManager;
 import cn.nukkit.math.NukkitRandom;
@@ -29,7 +30,7 @@ public final class Void extends Generator {
 
     @Override
     public void generateChunk(final int chunkX, final int chunkZ) {
-        this.level.getChunk(chunkX, chunkZ).setBlock(0, 60, 0, BlockID.BEDROCK);
+        this.level.getChunk(chunkX, chunkZ).getAndSetBlock(0, 60, 0, Block.get(BlockID.BEDROCK));
     }
 
     @Override
