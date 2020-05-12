@@ -155,7 +155,8 @@ public class Anvil extends BaseLevelProvider {
         int count = 0;
         final cn.nukkit.level.format.ChunkSection[] sections = chunk.getSections();
         for (int i = sections.length - 1; i >= 0; i--) {
-            if (!sections[i].isEmpty()) {
+            final cn.nukkit.level.format.ChunkSection section = sections[i];
+            if (!section.isEmpty()) {
                 count = i + 1;
                 break;
             }

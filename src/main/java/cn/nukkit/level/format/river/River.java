@@ -188,6 +188,11 @@ public final class River extends BaseLevelProvider {
     }
 
     @Override
+    public void saveLevelData() {
+
+    }
+
+    @Override
     public GameRules getGamerules() {
         return GameRules.getDefault();
     }

@@ -17,6 +17,7 @@ public class RiverChunk extends BaseChunk {
 
     public RiverChunk(final LevelProvider provider, final int x, final int z) {
         this.provider = provider;
+        this.providerClass = River.class;
         this.setPosition(x, z);
         this.heightMap = new byte[256];
         this.biomes = new byte[256];
@@ -33,6 +34,7 @@ public class RiverChunk extends BaseChunk {
     }
 
     public RiverChunk(final int x, final int z, final ChunkSection[] sections, final byte[] heightMap, final byte[] biomes) {
+        this.providerClass = River.class;
         this.x = x;
         this.z = z;
         this.heightMap = heightMap;
