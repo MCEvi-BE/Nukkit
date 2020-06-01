@@ -1907,18 +1907,24 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             nbt = oldPlayer.namedTag;
             oldPlayer.close("", "disconnectionScreen.loggedinOtherLocation");
         } else {
-            File legacyDataFile = new File(server.getDataPath() + "players/" + this.username.toLowerCase() + ".dat");
-            File dataFile = new File(server.getDataPath() + "players/" + this.uuid.toString() + ".dat");
-            if (legacyDataFile.exists() && !dataFile.exists()) {
-                nbt = this.server.getOfflinePlayerData(this.username, false);
+            if (getServer().getCustomPlayerData() == null) {
+                File legacyDataFile = new File(server.getDataPath() + "players/" + this.username.toLowerCase() + ".dat");
+                File dataFile = new File(server.getDataPath() + "players/" + this.uuid.toString() + ".dat");
+                if (legacyDataFile.exists() && !dataFile.exists()) {
+                    nbt = this.server.getOfflinePlayerData(this.username, false);
 
-                if (!legacyDataFile.delete()) {
-                    log.warn("Could not delete legacy player data for {}", this.username);
+                    if (!legacyDataFile.delete()) {
+                        log.warn("Could not delete legacy player data for {}", this.username);
+                    }
+                } else {
+                    nbt = this.server.getOfflinePlayerData(this.uuid, true);
                 }
             } else {
-                nbt = this.server.getOfflinePlayerData(this.uuid, true);
+                nbt = getServer().getCustomPlayerData().onDataGet(this.uuid, this.username, this.loginChainData.getXUID());
             }
+
         }
+
 
         if (nbt == null) {
             this.close(this.getLeaveMessage(), "Invalid data");

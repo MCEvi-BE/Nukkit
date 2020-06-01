@@ -266,6 +266,8 @@ public class Server {
 
     private int lastLevelGC;
 
+    private CustomPlayerData customPlayerData;
+
     Server(final String filePath, final String dataPath, final String pluginPath, String predefinedLanguage) {
         Preconditions.checkState(Server.instance == null, "Already initialized!");
         this.currentThread = Thread.currentThread(); // Saves the current thread instance as a reference, used in Server#isPrimaryThread()
@@ -2426,4 +2428,11 @@ public class Server {
 
     }
 
+    public CustomPlayerData getCustomPlayerData() {
+        return customPlayerData;
+    }
+
+    public void setCustomPlayerData(CustomPlayerData customPlayerData) {
+        this.customPlayerData = customPlayerData;
+    }
 }
