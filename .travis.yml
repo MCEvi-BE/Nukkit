@@ -5,4 +5,4 @@ jdk:
 before_install:
   - chmod +x mvnw
 install:
-  - mvn clean package
+  - mvn clean package -B -ntp
