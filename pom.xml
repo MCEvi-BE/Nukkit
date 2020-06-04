@@ -46,14 +46,12 @@
 
     <distributionManagement>
         <repository>
-            <id>releases</id>
-            <name>nukkitx-releases</name>
-            <url>https://repo.nukkitx.com/release</url>
+            <id>myMavenRepo.write</id>
+            <url>${myMavenRepo.write.url}</url>
         </repository>
         <snapshotRepository>
-            <id>snapshots</id>
-            <name>nukkitx-snapshots</name>
-            <url>https://repo.nukkitx.com/snapshot</url>
+            <id>myMavenRepo.write</id>
+            <url>${myMavenRepo.write.url}</url>
         </snapshotRepository>
     </distributionManagement>
 
