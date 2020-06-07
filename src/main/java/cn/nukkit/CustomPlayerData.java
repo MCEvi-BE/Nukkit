@@ -8,4 +8,5 @@ public interface CustomPlayerData {
 
     CompoundTag onDataGet(UUID uuid, String name, String xuid);
 
+    void onDataSet(UUID uuid, String name, String xuid, CompoundTag tag);
 }

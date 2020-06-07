@@ -268,6 +268,7 @@ public class Server {
 
     private CustomPlayerData customPlayerData;
 
+
     Server(final String filePath, final String dataPath, final String pluginPath, String predefinedLanguage) {
         Preconditions.checkState(Server.instance == null, "Already initialized!");
         this.currentThread = Thread.currentThread(); // Saves the current thread instance as a reference, used in Server#isPrimaryThread()
@@ -293,7 +294,7 @@ public class Server {
         this.consoleThread = new Server.ConsoleThread();
         this.consoleThread.start();
 
-        //todo: VersionString 现在不必要
+        //todo: VersionString 现在不必要 - corona
 
         if (!new File(this.dataPath + "nukkit.yml").exists()) {
             this.getLogger().info(TextFormat.GREEN + "Welcome! Please choose a language first!");

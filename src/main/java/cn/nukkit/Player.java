@@ -3752,7 +3752,11 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             this.namedTag.putFloat("foodSaturationLevel", this.getFoodData().getFoodSaturationLevel());
 
             if (!this.username.isEmpty() && this.namedTag != null) {
-                this.server.saveOfflinePlayerData(this.uuid, this.namedTag, async);
+                if (this.server.getCustomPlayerData() != null) {
+                    this.server.getCustomPlayerData().onDataSet(this.uuid, this.username, this.loginChainData.getXUID(), this.namedTag);
+                } else {
+                    this.server.saveOfflinePlayerData(this.uuid, this.namedTag, async);
+                }
             }
         }
     }
