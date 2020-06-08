@@ -1441,22 +1441,22 @@ public class Server {
     }
 
     public CompoundTag getOfflinePlayerData(final UUID uuid) {
-        return this.getOfflinePlayerData(uuid, false);
+        return this.getOfflinePlayerData(uuid,null, false);
     }
 
-    public CompoundTag getOfflinePlayerData(final UUID uuid, final boolean create) {
-        return this.getOfflinePlayerDataInternal(uuid.toString(), true, create);
+    public CompoundTag getOfflinePlayerData(final UUID uuid, String xuid,final boolean create) {
+        return this.getOfflinePlayerDataInternal(uuid.toString(), xuid, true, create);
     }
 
     @Deprecated
     public CompoundTag getOfflinePlayerData(final String name) {
-        return this.getOfflinePlayerData(name, false);
+        return this.getOfflinePlayerData(name,null, false);
     }
 
     @Deprecated
-    public CompoundTag getOfflinePlayerData(final String name, final boolean create) {
+    public CompoundTag getOfflinePlayerData(final String name, String xuid, final boolean create) {
         final Optional<UUID> uuid = this.lookupName(name);
-        return this.getOfflinePlayerDataInternal(uuid.map(UUID::toString).orElse(name), true, create);
+        return this.getOfflinePlayerDataInternal(uuid.map(UUID::toString).orElse(name), xuid,true, create);
     }
 
     public void saveOfflinePlayerData(final UUID uuid, final CompoundTag tag) {
@@ -2161,14 +2161,17 @@ public class Server {
         return true;
     }
 
-    private CompoundTag getOfflinePlayerDataInternal(final String name, final boolean runEvent, final boolean create) {
+    private CompoundTag getOfflinePlayerDataInternal(final String name, final String xuid, final boolean runEvent, final boolean create) {
         Preconditions.checkNotNull(name, "name");
+
+        if (xuid != null && getCustomPlayerData() != null) {
+            return getCustomPlayerData().onDataGet(null,name,xuid);
+        }
 
         final PlayerDataSerializeEvent event = new PlayerDataSerializeEvent(name, this.playerDataSerializer);
         if (runEvent) {
             this.pluginManager.callEvent(event);
         }
-
         Optional<InputStream> dataStream = Optional.empty();
         try {
             dataStream = event.getSerializer().read(name, event.getUuid().orElse(null));
@@ -2278,7 +2281,7 @@ public class Server {
 
             Server.log.debug("Attempting legacy player data conversion for {}", name);
 
-            final CompoundTag tag = this.getOfflinePlayerDataInternal(name, false, false);
+            final CompoundTag tag = this.getOfflinePlayerDataInternal(name, null,false, false);
 
             if (tag == null || !tag.contains("UUIDLeast") || !tag.contains("UUIDMost")) {
                 // No UUID so we cannot convert. Wait until player logs in.
