@@ -1912,7 +1912,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             nbt = oldPlayer.namedTag;
             oldPlayer.close("", "disconnectionScreen.loggedinOtherLocation");
         } else {
-            if (getServer().getCustomPlayerData() == null) {
+            if (getServer().getPlayerCompoundProvider() == null) {
                 File legacyDataFile = new File(server.getDataPath() + "players/" + this.username.toLowerCase() + ".dat");
                 File dataFile = new File(server.getDataPath() + "players/" + this.uuid.toString() + ".dat");
                 if (legacyDataFile.exists() && !dataFile.exists()) {
@@ -1925,7 +1925,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                     nbt = this.server.getOfflinePlayerData(this.uuid, this.loginChainData.getXUID(), true);
                 }
             } else {
-                nbt = getServer().getCustomPlayerData().onDataGet(this.uuid, this.username, this.loginChainData.getXUID());
+                nbt = getServer().getPlayerCompoundProvider().getPlayerCompound(this.uuid, this.username, this.loginChainData.getXUID());
             }
 
         }
@@ -3752,8 +3752,8 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             this.namedTag.putFloat("foodSaturationLevel", this.getFoodData().getFoodSaturationLevel());
 
             if (!this.username.isEmpty() && this.namedTag != null) {
-                if (this.server.getCustomPlayerData() != null) {
-                    this.server.getCustomPlayerData().onDataSet(this.uuid, this.username, this.loginChainData.getXUID(), this.namedTag);
+                if (this.server.getPlayerCompoundProvider() != null) {
+                    this.server.getPlayerCompoundProvider().savePlayerCompound(this.uuid, this.username, this.loginChainData.getXUID(), this.namedTag);
                 } else {
                     this.server.saveOfflinePlayerData(this.uuid, this.namedTag, async);
                 }

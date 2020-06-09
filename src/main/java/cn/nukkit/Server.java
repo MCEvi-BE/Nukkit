@@ -266,7 +266,7 @@ public class Server {
 
     private int lastLevelGC;
 
-    private CustomPlayerData customPlayerData;
+    private PlayerCompoundProvider playerCompoundProvider;
 
 
     Server(final String filePath, final String dataPath, final String pluginPath, String predefinedLanguage) {
@@ -2164,8 +2164,8 @@ public class Server {
     private CompoundTag getOfflinePlayerDataInternal(final String name, final String xuid, final boolean runEvent, final boolean create) {
         Preconditions.checkNotNull(name, "name");
 
-        if (xuid != null && getCustomPlayerData() != null) {
-            return getCustomPlayerData().onDataGet(null,name,xuid);
+        if (xuid != null && getPlayerCompoundProvider() != null) {
+            return getPlayerCompoundProvider().getPlayerCompound(null,name,xuid);
         }
 
         final PlayerDataSerializeEvent event = new PlayerDataSerializeEvent(name, this.playerDataSerializer);
@@ -2432,11 +2432,11 @@ public class Server {
 
     }
 
-    public CustomPlayerData getCustomPlayerData() {
-        return customPlayerData;
+    public PlayerCompoundProvider getPlayerCompoundProvider() {
+        return playerCompoundProvider;
     }
 
-    public void setCustomPlayerData(CustomPlayerData customPlayerData) {
-        this.customPlayerData = customPlayerData;
+    public void setPlayerCompoundProvider(PlayerCompoundProvider playerCompoundProvider) {
+        this.playerCompoundProvider = playerCompoundProvider;
     }
 }
