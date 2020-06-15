@@ -14,13 +14,13 @@ import java.util.Objects;
  * Nukkit Project
  */
 public class BaseLang {
+
     public static final String FALLBACK_LANGUAGE = "eng";
 
     protected final String langName;
 
     protected Map<String, String> lang = new HashMap<>();
     protected Map<String, String> fallbackLang = new HashMap<>();
-
 
     public BaseLang(String lang) {
         this(lang, null);
@@ -42,9 +42,8 @@ public class BaseLang {
             this.lang = this.loadLang(path + this.langName + "/lang.ini");
             if (useFallback) this.fallbackLang = this.loadLang(path + fallback + "/lang.ini");
         }
+
         if (this.fallbackLang == null) this.fallbackLang = this.lang;
-
-
     }
 
     public Map<String, String> getLangMap() {

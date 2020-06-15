@@ -938,6 +938,11 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             this.respawn();
         }
 
+        if (getServer().getPlayerCompoundProvider() != null) {
+            getServer().getPlayerCompoundProvider().playerJoinHandle(
+                    this.uuid, this.username, this.loginChainData.getXUID()
+            );
+        }
     }
 
     protected boolean orderChunks() {
@@ -3636,6 +3641,9 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                 this.server.getPluginManager().callEvent(ev = new PlayerQuitEvent(this, message, true, reason));
                 if (this.loggedIn && ev.getAutoSave()) {
                     this.save();
+                    if(getServer().getPlayerCompoundProvider() != null) {
+                        getServer().getPlayerCompoundProvider().playerQuitHandle(this.uuid, this.username, this.loginChainData.getXUID());
+                    }
                 }
                 if (this.fishing != null) {
                     this.stopFishing(false);
