@@ -36,14 +36,10 @@ import org.apache.logging.log4j.core.config.LoggerConfig;
 @Log4j2
 public class Nukkit {
 
-    public static final Properties GIT_INFO = Nukkit.getGitInfo();
-
-    public static final String VERSION = Nukkit.getVersion();
-
-    public static final String API_VERSION = "1.0.9";
-
-    public static final String CODENAME = "";
-
+    public final static Properties GIT_INFO = getGitInfo();
+    public final static String VERSION = getVersion();
+    public final static String API_VERSION = "1.0.10";
+    public final static String CODENAME = "";
     @Deprecated
     public static final String MINECRAFT_VERSION = ProtocolInfo.MINECRAFT_VERSION;
 
