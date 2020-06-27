@@ -45,14 +45,14 @@
     </repositories>
 
     <distributionManagement>
-        <repository>
-            <id>myMavenRepo.write</id>
-            <url>${myMavenRepo.write.url}</url>
-        </repository>
         <snapshotRepository>
-            <id>myMavenRepo.write</id>
-            <url>${myMavenRepo.write.url}</url>
+            <id>artipie</id>
+            <url>http://185.106.20.61:5000/MinecraftHouse/maven/</url>
         </snapshotRepository>
+        <repository>
+            <id>artipie</id>
+            <url>http://185.106.20.61:5000/MinecraftHouse/maven/</url>
+        </repository>
     </distributionManagement>
 
     <dependencies>
