@@ -92,6 +92,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
+
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
@@ -266,6 +268,7 @@ public class Server {
 
     private int lastLevelGC;
 
+    @Getter
     private PlayerCompoundProvider playerCompoundProvider;
 
 
@@ -696,10 +699,6 @@ public class Server {
                 return 3;
         }
         return -1;
-    }
-
-    public static Server getInstance() {
-        return Server.instance;
     }
 
     public int broadcastMessage(final String message) {
