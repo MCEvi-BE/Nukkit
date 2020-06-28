@@ -269,10 +269,12 @@ public class Server {
     private PlayerCompoundProvider playerCompoundProvider;
 
 
-    Server(final String filePath, final String dataPath, final String pluginPath, String predefinedLanguage) {
-        Preconditions.checkState(Server.instance == null, "Already initialized!");
-        this.currentThread = Thread.currentThread(); // Saves the current thread instance as a reference, used in Server#isPrimaryThread()
-        Server.instance = this;
+    private final Set<String> ignoredPackets = new HashSet<>();
+
+    Server(final String filePath, String dataPath, String pluginPath, String predefinedLanguage) {
+        Preconditions.checkState(instance == null, "Already initialized!");
+        currentThread = Thread.currentThread(); // Saves the current thread instance as a reference, used in Server#isPrimaryThread()
+        instance = this;
 
         this.filePath = filePath;
         if (!new File(dataPath + "worlds/").exists()) {
@@ -349,7 +351,21 @@ public class Server {
         Server.log.info("Loading {} ...", TextFormat.GREEN + "nukkit.yml" + TextFormat.WHITE);
         this.config = new Config(this.dataPath + "nukkit.yml", Config.YAML);
 
-        Server.log.info("Loading {} ...", TextFormat.GREEN + "server.properties" + TextFormat.WHITE);
+        Nukkit.DEBUG = NukkitMath.clamp(this.getConfig("debug.level", 1), 1, 3);
+
+        int logLevel = (Nukkit.DEBUG + 3) * 100;
+        org.apache.logging.log4j.Level currentLevel = Nukkit.getLogLevel();
+        for (org.apache.logging.log4j.Level level : org.apache.logging.log4j.Level.values()) {
+            if (level.intLevel() == logLevel && level.intLevel() > currentLevel.intLevel()) {
+                Nukkit.setLogLevel(level);
+                break;
+            }
+        }
+
+        ignoredPackets.addAll(getConfig().getStringList("debug.ignored-packets"));
+        ignoredPackets.add("BatchPacket");
+
+        log.info("Loading {} ...", TextFormat.GREEN + "server.properties" + TextFormat.WHITE);
         this.properties = new Config(this.dataPath + "server.properties", Config.PROPERTIES, new ConfigSection() {
             {
                 this.put("motd", "A Nukkit Powered Server");
@@ -443,18 +459,7 @@ public class Server {
             this.setPropertyInt("difficulty", 3);
         }
 
-        Nukkit.DEBUG = NukkitMath.clamp(this.getConfig("debug.level", 1), 1, 3);
-
-        final int logLevel = (Nukkit.DEBUG + 3) * 100;
-        final org.apache.logging.log4j.Level currentLevel = Nukkit.getLogLevel();
-        for (final org.apache.logging.log4j.Level level : org.apache.logging.log4j.Level.values()) {
-            if (level.intLevel() == logLevel && level.intLevel() > currentLevel.intLevel()) {
-                Nukkit.setLogLevel(level);
-                break;
-            }
-        }
-
-        final boolean bugReport;
+        boolean bugReport;
         if (this.getConfig().exists("settings.bug-report")) {
             bugReport = this.getConfig().getBoolean("settings.bug-report");
             this.getProperties().remove("bug-report");
@@ -807,9 +812,9 @@ public class Server {
             this.getScheduler().scheduleAsyncTask(new CompressBatchedTask(payload, targets, this.networkCompressionLevel));
         } else {
             try {
-                final byte[] data = Binary.appendBytes(payload);
-                this.broadcastPacketsCallback(Zlib.deflate(data, this.networkCompressionLevel), targets);
-            } catch (final Exception e) {
+                byte[] data = Binary.appendBytes(payload);
+                this.broadcastPacketsCallback(Network.deflate_raw(data, this.networkCompressionLevel), targets);
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
@@ -2432,8 +2437,12 @@ public class Server {
 
     }
 
-    public PlayerCompoundProvider getPlayerCompoundProvider() {
-        return playerCompoundProvider;
+    public boolean isIgnoredPacket(Class<? extends DataPacket> clazz) {
+        return this.ignoredPackets.contains(clazz.getSimpleName());
+    }
+
+    public static Server getInstance() {
+        return instance;
     }
 
     public void setPlayerCompoundProvider(PlayerCompoundProvider playerCompoundProvider) {
