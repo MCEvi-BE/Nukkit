@@ -46,11 +46,11 @@
 
     <distributionManagement>
         <snapshotRepository>
-            <id>artipie</id>
+            <id>artipie-local</id>
             <url>http://185.106.20.61:5000/MinecraftHouse/maven/</url>
         </snapshotRepository>
         <repository>
-            <id>artipie</id>
+            <id>artipie-local</id>
             <url>http://185.106.20.61:5000/MinecraftHouse/maven/</url>
         </repository>
     </distributionManagement>
