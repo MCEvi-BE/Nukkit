@@ -28,7 +28,7 @@ FROM openjdk:8-jre-slim AS run
 LABEL maintainer="Micheal Waltz <dockerfiles@ecliptik.com>"
 
 # Copy artifact from build image
-COPY --from=build /src/target/nukkit-1.0-SNAPSHOT.jar /app/nukkit.jar
+COPY --from=build /src/target/nukkit-1.0.jar /app/nukkit.jar
 
 # Create minecraft user
 RUN useradd --user-group \
