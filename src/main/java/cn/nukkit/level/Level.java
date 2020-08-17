@@ -1042,10 +1042,15 @@ public class Level implements ChunkManager, Metadatable {
         return this.save(false);
     }
 
+
     public boolean save(final boolean force) {
         if (!this.getAutoSave() && !force) {
             return false;
         }
+
+        int chunksPerLoader = Math.min(200, Math.max(1, (int) (((double) (this.chunksPerTicks - this.loaders.size()) / this.loaders.size() + 0.5))));
+        int randRange = 3 + chunksPerLoader / 30;
+        randRange = Math.min(randRange, this.chunkTickRadius);
 
         this.server.getPluginManager().callEvent(new LevelSaveEvent(this));
 
@@ -2848,9 +2853,66 @@ public class Level implements ChunkManager, Metadatable {
         }
     }
 
-    @Override
-    public void setMetadata(final String metadataKey, final MetadataValue newMetadataValue) {
-        this.server.getLevelMetadata().setMetadata(this, metadataKey, newMetadataValue);
+    private int lastUnloadIndex;
+
+    /**
+     * @param now
+     * @param allocatedTime
+     * @param force
+     * @return true if there is allocated time remaining
+     */
+    private boolean unloadChunks(long now, long allocatedTime, boolean force) {
+        if (!this.unloadQueue.isEmpty()) {
+            boolean result = true;
+            int maxIterations = this.unloadQueue.size();
+
+            if (lastUnloadIndex > maxIterations) lastUnloadIndex = 0;
+            ObjectIterator<Long2LongMap.Entry> iter = this.unloadQueue.long2LongEntrySet().iterator();
+            if (lastUnloadIndex != 0) iter.skip(lastUnloadIndex);
+
+            LongList toUnload = null;
+
+            for (int i = 0; i < maxIterations; i++) {
+                if (!iter.hasNext()) {
+                    iter = this.unloadQueue.long2LongEntrySet().iterator();
+                }
+                Long2LongMap.Entry entry = iter.next();
+
+                long index = entry.getLongKey();
+
+                if (isChunkInUse(index)) {
+                    continue;
+                }
+
+                if (!force) {
+                    long time = entry.getLongValue();
+                    if (time > (now - 30000)) {
+                        continue;
+                    }
+                }
+
+                if (toUnload == null) toUnload = new LongArrayList();
+                toUnload.add(index);
+            }
+
+            if (toUnload != null) {
+                long[] arr = toUnload.toLongArray();
+                for (long index : arr) {
+                    int X = getHashX(index);
+                    int Z = getHashZ(index);
+                    if (this.unloadChunk(X, Z, true)) {
+                        this.unloadQueue.remove(index);
+                        if (System.currentTimeMillis() - now >= allocatedTime) {
+                            result = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            return result;
+        } else {
+            return true;
+        }
     }
 
     @Override

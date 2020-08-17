@@ -211,11 +211,9 @@ public class CompoundTag extends Tag implements Cloneable {
         return Optional.of(((NumberTag) this.tags.get(name)).getData().intValue());
     }
 
-    public long getLong(final String name) {
-        if (!this.tags.containsKey(name)) {
-            return 0;
-        }
-        return ((NumberTag) this.tags.get(name)).getData().longValue();
+    public long getLong(String name) {
+        if (!tags.containsKey(name)) return 0;
+        return ((NumberTag) tags.get(name)).getData().longValue();
     }
 
     public float getFloat(final String name) {
@@ -225,11 +223,9 @@ public class CompoundTag extends Tag implements Cloneable {
         return ((NumberTag) this.tags.get(name)).getData().floatValue();
     }
 
-    public double getDouble(final String name) {
-        if (!this.tags.containsKey(name)) {
-            return 0;
-        }
-        return ((NumberTag) this.tags.get(name)).getData().doubleValue();
+    public double getDouble(String name) {
+        if (!tags.containsKey(name)) return 0;
+        return ((NumberTag) tags.get(name)).getData().doubleValue();
     }
 
     public String getString(final String name) {
@@ -276,12 +272,9 @@ public class CompoundTag extends Tag implements Cloneable {
         return (CompoundTag) this.tags.get(name);
     }
 
-    @SuppressWarnings("unchecked")
-    public ListTag<? extends Tag> getList(final String name) {
-        if (!this.tags.containsKey(name)) {
-            return new ListTag<>(name);
-        }
-        return (ListTag<? extends Tag>) this.tags.get(name);
+    public ListTag<? extends Tag> getList(String name) {
+        if (!tags.containsKey(name)) return new ListTag<>(name);
+        return (ListTag<? extends Tag>) tags.get(name);
     }
 
     @SuppressWarnings("unchecked")
