@@ -2853,68 +2853,6 @@ public class Level implements ChunkManager, Metadatable {
         }
     }
 
-    private int lastUnloadIndex;
-
-    /**
-     * @param now
-     * @param allocatedTime
-     * @param force
-     * @return true if there is allocated time remaining
-     */
-    private boolean unloadChunks(long now, long allocatedTime, boolean force) {
-        if (!this.unloadQueue.isEmpty()) {
-            boolean result = true;
-            int maxIterations = this.unloadQueue.size();
-
-            if (lastUnloadIndex > maxIterations) lastUnloadIndex = 0;
-            ObjectIterator<Long2LongMap.Entry> iter = this.unloadQueue.long2LongEntrySet().iterator();
-            if (lastUnloadIndex != 0) iter.skip(lastUnloadIndex);
-
-            LongList toUnload = null;
-
-            for (int i = 0; i < maxIterations; i++) {
-                if (!iter.hasNext()) {
-                    iter = this.unloadQueue.long2LongEntrySet().iterator();
-                }
-                Long2LongMap.Entry entry = iter.next();
-
-                long index = entry.getLongKey();
-
-                if (isChunkInUse(index)) {
-                    continue;
-                }
-
-                if (!force) {
-                    long time = entry.getLongValue();
-                    if (time > (now - 30000)) {
-                        continue;
-                    }
-                }
-
-                if (toUnload == null) toUnload = new LongArrayList();
-                toUnload.add(index);
-            }
-
-            if (toUnload != null) {
-                long[] arr = toUnload.toLongArray();
-                for (long index : arr) {
-                    int X = getHashX(index);
-                    int Z = getHashZ(index);
-                    if (this.unloadChunk(X, Z, true)) {
-                        this.unloadQueue.remove(index);
-                        if (System.currentTimeMillis() - now >= allocatedTime) {
-                            result = false;
-                            break;
-                        }
-                    }
-                }
-            }
-            return result;
-        } else {
-            return true;
-        }
-    }
-
     @Override
     public List<MetadataValue> getMetadata(final String metadataKey) {
         return this.server.getLevelMetadata().getMetadata(this, metadataKey);
