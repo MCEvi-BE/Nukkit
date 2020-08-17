@@ -2854,6 +2854,11 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     @Override
+    public void setMetadata(String metadataKey, MetadataValue newMetadataValue) throws Exception {
+        this.server.getLevelMetadata().setMetadata(this, metadataKey, newMetadataValue);
+    }
+
+    @Override
     public List<MetadataValue> getMetadata(final String metadataKey) {
         return this.server.getLevelMetadata().getMetadata(this, metadataKey);
     }
