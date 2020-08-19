@@ -17,6 +17,13 @@
         <jline.version>3.9.0</jline.version>
     </properties>
 
+    <distributionManagement>
+        <repository>
+            <id>artipie</id>
+            <url>${artipie.url}</url>
+        </repository>
+    </distributionManagement>
+
     <repositories>
         <repository>
             <id>nukkitx-repo-release</id>
