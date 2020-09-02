@@ -186,7 +186,7 @@ public class Level implements ChunkManager, Metadatable {
     };
 
 
-    private final BlockUpdateScheduler updateQueue;
+    private BlockUpdateScheduler updateQueue;
     private final Queue<Block> normalUpdateQueue = new ConcurrentLinkedDeque<>();
 //    private final TreeSet<BlockUpdateEntry> updateQueue = new TreeSet<>();
 //    private final List<BlockUpdateEntry> nextTickUpdates = Lists.newArrayList();
@@ -1644,6 +1644,52 @@ public class Level implements ChunkManager, Metadatable {
                 this.computeSpreadBlockLight(x, y, z + 1, lightLevel, lightPropagationQueue, visited);
             }
         }
+    }
+
+    public void prepareLevel(final Class<? extends LevelProvider> provider) {
+        this.provider.updateLevelName(this.folderName);
+
+        this.server.getLogger().info(this.server.getLanguage().translateString("nukkit.level.preparing",
+            TextFormat.GREEN + this.provider.getName() + TextFormat.WHITE));
+
+        this.generatorClass = Generator.getGenerator(this.provider.getGenerator());
+
+        try {
+            this.useSections = (boolean) provider.getMethod("usesChunkSection").invoke(null);
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        this.time = this.provider.getTime();
+
+        this.raining = this.provider.isRaining();
+        this.rainTime = this.provider.getRainTime();
+        if (this.rainTime <= 0) {
+            this.setRainTime(ThreadLocalRandom.current().nextInt(168000) + 12000);
+        }
+
+        this.thundering = this.provider.isThundering();
+        this.thunderTime = this.provider.getThunderTime();
+        if (this.thunderTime <= 0) {
+            this.setThunderTime(ThreadLocalRandom.current().nextInt(168000) + 12000);
+        }
+
+        this.levelCurrentTick = this.provider.getCurrentTick();
+        this.updateQueue = new BlockUpdateScheduler(this, this.levelCurrentTick);
+
+        this.chunkTickRadius = Math.min(this.server.getViewDistance(),
+            Math.max(1, this.server.getConfig("chunk-ticking.tick-radius", 4)));
+        this.chunksPerTicks = this.server.getConfig("chunk-ticking.per-tick", 40);
+        this.chunkGenerationQueueSize = this.server.getConfig("chunk-generation.queue-size", 8);
+        this.chunkPopulationQueueSize = this.server.getConfig("chunk-generation.population-queue-size", 2);
+        this.chunkTickList.clear();
+        this.clearChunksOnTick = this.server.getConfig("chunk-ticking.clear-tick-list", true);
+        this.cacheChunks = this.server.getConfig("chunk-sending.cache-chunks", false);
+        this.temporalPosition = new Position(0, 0, 0, this);
+        this.temporalVector = new Vector3(0, 0, 0);
+        this.tickRate = 1;
+
+        this.skyLightSubtracted = this.calculateSkylightSubtracted(1);
     }
 
     private void computeRemoveBlockLight(int x, int y, int z, int currentLight, Queue<Object[]> queue,
